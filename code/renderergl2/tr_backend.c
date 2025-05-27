@@ -3758,7 +3758,7 @@ void RB_ExecuteRenderCommands( const void *data ) {
 		case RC_VIDEOFRAME:
 			dprintf("r3 takevideoframe\n");
 			//ri.Printf(PRINT_ALL, "r3 takevideoframe\n");
-			data = RB_TakeVideoFrameCmd(data, &shotDataMain);
+			data = RB_TakeVideoFrameCmd(data);
 			break;
 		case RC_END_OF_LIST:
 			t2 = ri.RealMilliseconds();
