@@ -1409,20 +1409,6 @@ qboolean Sys_PIDIsRunning( int pid )
 	return qfalse;
 }
 
-void Sys_Backtrace_f (void)
-{
-	int pid;
-	char command[MAX_STRING_CHARS];
-
-	pid = _getpid();
-	Com_Printf("Sys_Backtrace_f() pid: %d\n", pid);
-	//execlp("gdb", "gdb", "--batch", "-n", "-ex", "thread", "-ex", "bt full", name_buf, pid_buf, NULL);
-	//system("./gdb --batch -n -ex thread -ex bt full ");
-	//snprintf(command, sizeof(command), "./gdb.exe --batch -n -ex thread -ex bt full wolfcamql.exe %d > bt.txt", pid);
-	snprintf(command, sizeof(command), "gdb.exe --batch -n -ex \"thread apply all bt full\" wolfcamql.exe %d > bt.txt", pid);
-	system(command);
-}
-
 void Sys_OpenQuakeLiveDirectory (void)
 {
 	PROCESS_INFORMATION pi;
