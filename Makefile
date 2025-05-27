@@ -1476,7 +1476,7 @@ endif
 
 ifeq ($(USE_FREETYPE),1)
   FREETYPE_CFLAGS ?= $(shell $(PKG_CONFIG) --silence-errors --cflags freetype2 || true)
-  FREETYPE_LIBS ?= $(shell $(PKG_CONFIG) --silence-errors --libs freetype2 || echo -lfreetype)
+  #FREETYPE_LIBS ?= $(shell $(PKG_CONFIG) --silence-errors --libs freetype2 || echo -lfreetype)
 
   BASE_CFLAGS += -DBUILD_FREETYPE $(FREETYPE_CFLAGS)
   RENDERER_LIBS += $(FREETYPE_LIBS)
