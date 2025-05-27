@@ -5528,43 +5528,7 @@ void CL_Frame ( int msec, double fmsec ) {
 
 	//Com_Printf("video: %d\n", CL_VideoRecording(&afdMain));
 	// if recording an avi, lock to a fixed fps
-	if ((CL_VideoRecording(&afdMain) && cl_aviFrameRate->integer && msec)  &&  !(cl_freezeDemoPauseVideoRecording->integer  &&  cl_freezeDemo->integer)) {
-		//Com_Printf("yes\n");
-		// save the current screen
-		if ( clc.state == CA_ACTIVE || cl_forceavidemo->integer) {
-			int blurFrames;
-			double frameRateDivider;
-
-			frameRateDivider = (double)cl_aviFrameRateDivider->integer;
-			if (frameRateDivider < 1.0) {
-				frameRateDivider = 1.0;
-			}
-
-			CL_TakeVideoFrame(&afdMain);
-
-			// fixed time for next frame'
-			blurFrames = Cvar_VariableIntegerValue("mme_blurFrames");
-			if (blurFrames > 1) {
-				blurFramesFactor = 1.0 / (double)blurFrames;
-			}
-			f = ( ((double)1000.0f / ((double)cl_aviFrameRate->value * frameRateDivider)) * (double)com_timescale->value ) * blurFramesFactor;
-			//msec = (int)ceil(f);
-			msec = (int)floor(f);
-			//overf += ceil(f) - f;
-			Overf += f - floor(f);
-			if (Overf > 1.0) {
-				//msec -= (int)floor(overf);
-				//overf -= floor(overf);
-				msec += (int)floor(Overf);
-				Overf -= floor(Overf);
-			}
-			if (msec == 0) {
-				//Com_Printf("msec too small\n");
-				//msec = 1;
-			}
-			//Com_Printf("video msec: %lf %d  overf: %f\n", f, msec, overf);
-		}
-	} else if (1) {  //(com_timescale->value < 1.0) {
+	if (1) {  //(com_timescale->value < 1.0) {
 		//FIXME clampTime changes to msec
 		// msec will always be 1
 		if (!cl_freezeDemo->integer) {
