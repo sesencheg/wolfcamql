@@ -665,6 +665,7 @@ qboolean CL_OpenAVIForWriting( const char *fileName )
   return qtrue;
 }
 
+
 /*
 ===============
 CL_CheckFileSize
