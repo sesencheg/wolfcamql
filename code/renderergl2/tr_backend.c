@@ -3436,21 +3436,6 @@ void RB_ExecuteRenderCommands( const void *data ) {
 
 				RB_SwapBuffers(NULL, qfalse);
 
-				//ri.Printf(PRINT_ALL, "^3about to record...\n");
-				//FIXME hack
-				cmd.width = ri.afdLeft->width;
-				cmd.height = ri.afdLeft->height;
-				cmd.captureBuffer = ri.afdLeft->cBuffer;
-				cmd.encodeBuffer = ri.afdLeft->eBuffer;
-				cmd.motionJpeg = (ri.afdLeft->codec == CODEC_MJPEG);
-				cmd.avi = ri.afdLeft->avi;
-				cmd.tga = ri.afdLeft->tga;
-				cmd.jpg = ri.afdLeft->jpg;
-				cmd.png = ri.afdLeft->png;
-				cmd.picCount = ri.afdMain->picCount - 1;
-				Q_strncpyz(cmd.givenFileName, ri.afdMain->givenFileName, MAX_QPATH);
-				RB_TakeVideoFrameCmd(&cmd);
-				tr.leftRecorded = qtrue;
 			}
 
 			data = RB_ClearDepth(data);
