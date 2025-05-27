@@ -1206,7 +1206,7 @@ ifeq ($(PLATFORM),emscripten)
 
   # These allow a warning-free build.
   # Some of these warnings may actually be legit problems and should be fixed at some point.
-  BASE_CFLAGS+=-Wno-deprecated-non-prototype -Wno-dangling-else -Wno-implicit-const-int-float-conversion -Wno-misleading-indentation -Wno-format-overflow -Wno-logical-not-parentheses -Wno-absolute-value
+  BASE_CFLAGS+=-Wno-deprecated-non-prototype -Wno-dangling-else -Wno-implicit-const-int-float-conversion -Wno-misleading-indentation -Wno-format-overflow -Wno-logical-not-parentheses -Wno-absolute-value -msimd128 -msse2
 
   DEBUG_CFLAGS=-g3 -O0 # -fsanitize=address -fsanitize=undefined
   # Emscripten needs debug compiler flags to be passed to the linker as well
