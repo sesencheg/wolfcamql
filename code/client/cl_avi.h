@@ -125,6 +125,8 @@ typedef struct aviFileData_s
     byte pcmCaptureBuffer[PCM_BUFFER_SIZE];
 
     AVCodecContext *AC;
+
+    int           fileSize;
 } aviFileData_t;
 
 extern aviFileData_t afdMain;
