@@ -1259,40 +1259,12 @@ Unix specific initialisation
 */
 
 
-// code is from Apple's backtrace(3) man page
-static void print_dl_backtrace (void)
-{
-	void *callstack[128];
-	int i;
-	int frames;
-	char **strs;
-
-	frames = backtrace(callstack, 128);
-	strs = backtrace_symbols(callstack, frames);
-	for (i = 0;  i < frames;  i++) {
-		fprintf(stderr, "%s\n", strs[i]);
-	}
-	free(strs);
-}
-
 #if defined(__APPLE__)  ||  DEDICATED
 
 static int print_gdb_trace (void)
 {
 	//FIXME check for gdb?
 	return 0;
-}
-
-static void signal_crash (int signum, siginfo_t *info, void *ptr)
-{
-	fprintf(stderr, "crash with signal %d\n", signum);
-
-	//FIXME gdb backtrace?
-
-	fprintf(stderr, "internal backtrace:\n");
-	print_dl_backtrace();
-
-	exit(-1);
 }
 
 #else
@@ -1331,18 +1303,6 @@ static int print_gdb_trace (void)
 	return 0;
 }
 
-static void signal_crash (int signum, siginfo_t *info, void *ptr)
-{
-	fprintf(stderr, "crash with signal %d\n", signum);
-
-	if (print_gdb_trace() != -1) {
-		exit(1);
-	}
-
-	fprintf(stderr, "internal backtrace:\n");
-	print_dl_backtrace();
-	_exit(1);
-}
 
 // disabled since it needs stack register: -fno-omit-frame-pointer
 #if 0
