@@ -2705,8 +2705,6 @@ qboolean SavePNG (const char *name, byte *data, int width, int height, int byted
 //void RE_TakeVideoFrame( int width, int height,
 //		byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg );
 
-void RE_TakeVideoFrame (aviFileData_t *afd, int width, int height, byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg, qboolean avi, qboolean tga, qboolean jpg, qboolean png, int picCount, char *givenFileName);
-
 void R_ConvertTextureFormat( const byte *in, int width, int height, GLenum format, GLenum type, byte *out );
 
 
