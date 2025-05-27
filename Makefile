@@ -1163,6 +1163,14 @@ else # ifeq sunos
 
 ifeq ($(PLATFORM),emscripten)
 
+  ifeq ($(USE_FREETYPE),1)
+    #FIXME linux version is always using system libfreetype
+
+    # add extra freetype directories since they changed header locations
+    FREETYPE_CFLAGS += -I/usr/include/freetype2 -I/usr/include/freetype2/freetype
+    FREETYPE_LIBS = -lfreetype
+  endif
+  
   ifneq ($(findstring /emcc,$(CC)),/emcc)
     CC=emcc
   endif
