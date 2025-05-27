@@ -91,11 +91,9 @@ static void SNDDMA_AudioCallback(void *userdata, Uint8 *stream, int len)
 			len1 = tobufend;
 			len2 = len - len1;
 		}
-		if (CL_VideoRecording(&afdMain)  &&  (cl_aviNoAudioHWOutput->integer  ||  (cl_freezeDemo->integer  &&  cl_freezeDemoPauseVideoRecording->integer))) {
-			memset(stream, 0, len1);
-		} else {
-			memcpy(stream, dma.buffer + pos, len1);
-		}
+
+		memcpy(stream, dma.buffer + pos, len1);
+		
 		if (len2 <= 0) {
 			//Com_Printf("len2 <= 0   %d\n", len2);
 			dmapos += (len1 / (dma.samplebits/8));
