@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "snd_local.h"
 #include "cl_avi.h"
 
+#define INDEX_FILE_EXTENSION ".index.dat"
+
 #include <errno.h>
 
 /////////////////////////////
