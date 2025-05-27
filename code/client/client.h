@@ -815,7 +815,7 @@ qboolean CL_OpenAVIForWriting (aviFileData_t *afd, const char *filename, qboolea
 void CL_TakeVideoFrame (aviFileData_t *afd);
 void CL_WriteAVIVideoFrame( const byte *imageBuffer, int size );
 void CL_WriteAVIAudioFrame (aviFileData_t *afd, const byte *pcmBuffer, int size);
-qboolean CL_CloseAVI (aviFileData_t *afd, qboolean us);
+qboolean CL_CloseAVI( void );
 //qboolean CL_VideoRecording (aviFileData_t *afd);
 
 //

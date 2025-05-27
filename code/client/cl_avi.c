@@ -1516,142 +1516,69 @@ CL_CloseAVI
 Closes the AVI file and writes an index chunk
 ===============
 */
-qboolean CL_CloseAVI (aviFileData_t *afd, qboolean us)
+qboolean CL_CloseAVI( void )
 {
-    //int r;
-    int pos;
-    //char sbuf[MAX_QPATH];
+  int indexRemainder;
+  int indexSize = afd.numIndices * 16;
+  const char *idxFileName = va( "%s" INDEX_FILE_EXTENSION, afd.fileName );
 
-#if 0
-    if( !afd->fileOpen ) {
-        Com_Printf("^1CL_CloseAVI() file not open\n");
-        return qfalse;
-    }
-#endif
+  // AVI file isn't open
+  if( !afd.fileOpen )
+    return qfalse;
 
-    if (!afd->recording) {
-        //Com_Printf("CL_CloseAVI() not recording\n");
-        return qfalse;
-    }
+  afd.fileOpen = qfalse;
 
-  //FIXME need to flush audio maybe
+  FS_Seek( afd.idxF, 4, FS_SEEK_SET );
+  bufIndex = 0;
+  WRITE_4BYTES( indexSize );
+  SafeFS_Write( buffer, bufIndex, afd.idxF );
+  FS_FCloseFile( afd.idxF );
 
-  CL_WriteIndexes(afd);
-  CL_CloseRiff(afd);
-  //CL_WriteIndexes(afd);
+  // Write index
 
-  // finalize header
-
-  //FS_Seek(afd->f, 4, FS_SEEK_SET);  // "RIFF" size
-  //fwrite4(afd->fileSize1 - 8, afd->f);
-
-  FS_Seek(afd->f, afd->mainHeaderNumVideoFramesHeaderOffset, FS_SEEK_SET);
-  // not the total frames in file, only in the standard first riff
-  fwrite4(afd->numVideoFrames, afd->f);
-
-  FS_Seek(afd->f, afd->mainHeaderMaxRecordSizeHeaderOffset, FS_SEEK_SET);
-  fwrite4(afd->maxRecordSize, afd->f);
-
-  FS_Seek(afd->f, afd->numVideoFramesHeaderOffset, FS_SEEK_SET);
-  // even though opendml has header information for total number of video
-  // frames, other applications set this to the total as well
-  // 2015-07-15  if this isn't set to the real length programs like Windows
-  // Media Player, Windows dir list, and Adobe Premiere will believe that the
-  // file is too short.
-  fwrite4(afd->odmlNumVideoFrames, afd->f);
-
-  FS_Seek(afd->f, afd->videoHeaderMaxRecordSizeHeaderOffset, FS_SEEK_SET);
-  fwrite4(afd->maxRecordSize, afd->f);
-
-  if (afd->audio) {
-      FS_Seek(afd->f, afd->numAudioFramesHeaderOffset, FS_SEEK_SET);
-      fwrite4(afd->a.totalBytes / afd->a.sampleSize, afd->f);
+  // Open the temp index file
+  if( ( indexSize = FS_FOpenFileRead( idxFileName,
+          &afd.idxF, qtrue ) ) <= 0 )
+  {
+    FS_FCloseFile( afd.f );
+    return qfalse;
   }
 
+  indexRemainder = indexSize;
 
-  //FS_Seek(afd->f, afd->moviOffset1 + 4, FS_SEEK_SET);  // Skip "LIST"
-  //fwrite4(afd->moviSize1, afd->f);
-
-
-  if (afd->useOpenDml) {
-      //fseeko(afd->file, afd->mainHeaderNumVideoFramesHeaderOffset, SEEK_SET);
-      //fwrite4(afd->odmlNumVideoFrames, afd->f);
-
-      //fseeko(afd->file, afd->numVideoFramesHeaderOffset, SEEK_SET);
-      //fwrite4(afd->odmlNumVideoFrames, afd->f);
-
-      //FIXME  wrong, whatever
-      //fseeko(afd->file, afd->numAudioFramesHeaderOffset, SEEK_SET);
-      //fwrite4(afd->odmlNumAudioFrames, afd->f);
-
-      FS_Seek(afd->f, afd->odmlDmlhHeaderOffset, FS_SEEK_SET);
-      fwrite4(afd->odmlNumVideoFrames, afd->f);
-      //Com_Printf("odml:  video %lld  audio  %lld  total %lld\n", afd->odmlNumVideoFrames, afd->odmlNumAudioFrames, afd->odmlNumVideoFrames + afd->odmlNumAudioFrames);
-  } else {
-      //Com_Printf( "Wrote %d:%d (%d) frames to %s\n", afd->numVideoFrames, afd->numAudioFrames, afd->numVideoFrames + afd->numAudioFrames, afd->fileName );
+  // Append index to end of avi file
+  while( indexRemainder > MAX_AVI_BUFFER )
+  {
+    FS_Read( buffer, MAX_AVI_BUFFER, afd.idxF );
+    SafeFS_Write( buffer, MAX_AVI_BUFFER, afd.f );
+    afd.fileSize += MAX_AVI_BUFFER;
+    indexRemainder -= MAX_AVI_BUFFER;
   }
+  FS_Read( buffer, indexRemainder, afd.idxF );
+  SafeFS_Write( buffer, indexRemainder, afd.f );
+  afd.fileSize += indexRemainder;
+  FS_FCloseFile( afd.idxF );
 
-#if 0
-  //FIXME testing
-  fseeko(afd->file, 0, SEEK_END);
+  // Remove temp index file
+  FS_HomeRemove( idxFileName );
 
-  fwriteString("JUNK", afd->f);
-  fwrite4(16, afd->f);
-  fwrite8(0xdeadbeaf, afd->f);
-  fwrite8(0xdeadbeaf, afd->f);
-#endif
+  // Write the real header
+  FS_Seek( afd.f, 0, FS_SEEK_SET );
+  CL_WriteAVIHeader( );
 
-  if (!us) {
-      free(afd->cBuffer);
-      free(afd->eBuffer);
+  bufIndex = 4;
+  WRITE_4BYTES( afd.fileSize - 8 ); // "RIFF" size
 
-      if (afd->codec == CODEC_HUFFYUV) {
-          huffyuv_encode_end(afd->AC);
-          free(afd->AC->priv_data);
-          free(afd->AC);
-      }
-  }
+  bufIndex = afd.moviOffset + 4;    // Skip "LIST"
+  WRITE_4BYTES( afd.moviSize );
 
-  FS_FCloseFile( afd->f );
-  if (!afd->avi) {
-      FS_HomeRemove(afd->fileName);
-  }
-  //FS_FCloseFile(afd->idxF);
-  FS_FCloseFile(afd->idxVF);
-  FS_FCloseFile(afd->idxAF);
-  //FS_HomeRemove(va("%s%s", afd->fileName, INDEX_FILENAME_EXT));
-  FS_HomeRemove(va("%s%s", afd->fileName, INDEX_VIDEO_FILENAME_EXT));
-  FS_HomeRemove(va("%s%s", afd->fileName, INDEX_AUDIO_FILENAME_EXT));
-  afd->fileOpen = qfalse;
-  afd->file = NULL;
-  afd->recording = qfalse;
+  SafeFS_Write( buffer, bufIndex, afd.f );
 
-  if (!us) {
-      afd->PcmBytesInBuffer = 0;
-  }
+  Z_Free( afd.cBuffer );
+  Z_Free( afd.eBuffer );
+  FS_FCloseFile( afd.f );
 
-  //Com_Printf("^2%s closed\n", afd->fileName);
-
-  if (!us) {
-      if (afd->wav  &&  afd == &afdMain) {
-          pos = FS_FTell(afd->wavFile);
-          FS_Seek(afd->wavFile, 4, FS_SEEK_SET);
-          fwrite4(pos - 8, afd->wavFile);
-          FS_Seek(afd->wavFile, 40, FS_SEEK_SET);
-          fwrite4(pos - 44, afd->wavFile);
-
-          FS_FCloseFile(afd->wavFile);
-#if 0
-          if (!afd->wav) {
-              Com_sprintf(sbuf, MAX_QPATH, "videos/%s.wav", afd->givenFileName);
-              FS_HomeRemove(sbuf);
-          }
-#endif
-      }
-      //Com_Printf("video time: %d -> %d  total %d (%f)\n", afd->startTime, cl.snap.serverTime, cl.snap.serverTime - afd->startTime, (float)(cl.snap.serverTime - afd->startTime) / 1000.0);
-      //FIXME wrong -- can rewind while recording
-      //Com_Printf("video time: %d -> %d  total %d (%f)\n", afd->startTime, cls.realtime, cls.realtime - afd->startTime, (float)(cls.realtime - afd->startTime) / 1000.0);
-  }
+  Com_Printf( "Wrote %d:%d frames to %s\n", afd.numVideoFrames, afd.numAudioFrames, afd.fileName );
 
   return qtrue;
 }
