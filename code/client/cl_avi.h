@@ -127,6 +127,7 @@ typedef struct aviFileData_s
     AVCodecContext *AC;
 
     int           fileSize;
+    qboolean      motionJpeg;
 } aviFileData_t;
 
 extern aviFileData_t afdMain;
