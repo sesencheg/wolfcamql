@@ -209,7 +209,6 @@ static void CL_ServerStatusResponse( netadr_t from, msg_t *msg );
 static void CL_ReadExtraDemoMessage (demoFile_t *df);
 static void CL_CheckWorkshopDownload (void);
 
-void CL_StopVideo_f (void);
 static void stream_demo_look_ahead (void);
 static qboolean check_for_older_uncompressed_demo (void);
 
@@ -5962,154 +5961,6 @@ void CL_SetHeadModel_f( void ) {
 
 extern int s_soundtime;
 
-/*
-===============
-CL_Video_f
-
-video
-video [filename]
-===============
-*/
-void CL_Video_f( void )
-{
-  char  filename[ MAX_OSPATH ];
-  int   i;  //, last;
-  qboolean avi;
-  qboolean wav;
-  qboolean tga;
-  qboolean jpg;
-  qboolean png;
-  qboolean noSoundAvi;
-
-  if (!clc.demoplaying) {  //  ||  clc.state == CA_CONNECTING) {
-	  Com_Printf( "^1The video command can only be used when playing back demos\n" );
-	  return;
-  }
-
-  avi = qfalse;
-  wav = qfalse;
-  tga = qfalse;
-  jpg = qfalse;
-  png = qfalse;
-  noSoundAvi = qfalse;
-  filename[0] = '\0';
-  SplitVideo = qfalse;
-
-  for (i = 1;  i < Cmd_Argc();  i++) {
-	  if (!Q_stricmp(Cmd_Argv(i), "avi")) {
-		  avi = qtrue;
-	  } else if (!Q_stricmp(Cmd_Argv(i), "avins")) {
-		  noSoundAvi = qtrue;
-	  } else if (!Q_stricmp(Cmd_Argv(i), "wav")) {
-		  wav = qtrue;
-	  } else if (!Q_stricmp(Cmd_Argv(i), "tga")) {
-		  tga = qtrue;
-	  } else if (!Q_stricmp(Cmd_Argv(i), "jpg")) {
-		  jpg = qtrue;
-	  } else if (!Q_stricmp(Cmd_Argv(i), "jpeg")) {
-		  jpg = qtrue;
-	  } else if (!Q_stricmp(Cmd_Argv(i), "png")) {
-		  png = qtrue;
-	  } else if (!Q_stricmp(Cmd_Argv(i), "split")) {
-		  SplitVideo = qtrue;
-	  } else if (!Q_stricmp(Cmd_Argv(i), "name")) {
-		  if (!Q_stricmp(Cmd_Argv(i + 1), ":demoname")) {
-			  char dnameBuffer[MAX_OSPATH];
-
-			  COM_StripExtension(Cvar_VariableString("cl_demoFileBaseName"), dnameBuffer, MAX_OSPATH);
-			  Q_strncpyz(filename, dnameBuffer, MAX_OSPATH);
-		  } else {
-			  Q_strncpyz(filename, Cmd_Argv(i + 1), MAX_OSPATH);
-		  }
-		  i++;
-	  }
-  }
-
-  if (!avi  &&  !tga  &&  !jpg  &&  !png) {
-	  avi = qtrue;
-  }
-
-  if (avi  &&  (tga | jpg | png)) {
-	  Com_Printf("^1can't record video and screenshots at the same time\n");
-	  return;
-  }
-
-#if 0
-  if (Cmd_Argc() < 2) {
-	  avi = qtrue;
-  }
-#endif
-
-  if (avi  ||  wav) {
-	  if (!Q_stricmp(s_backend->string, "OpenAL")) {
-		  Com_Printf("^1can't record sound using OpenAL\n");
-		  return;
-	  }
-	  if (dma.samplebits != 16) {
-		  Com_Printf("^1can't record sound if audio sample bits not equal to 16 (see s_sdlBits)\n");
-		  return;
-	  }
-	  if (dma.channels != 2) {
-		  Com_Printf("^1can't record sound if audio channels not equal to 2 (see s_sdlChannels)\n");
-		  return;
-	  }
-  }
-
-  if (Cvar_VariableIntegerValue("mme_saveDepth")) {
-	  Video_DepthBuffer = malloc(cls.glconfig.vidWidth * cls.glconfig.vidHeight * sizeof(GLfloat) + 18);
-	  if (!Video_DepthBuffer) {
-		  Com_Error(ERR_DROP, "Couldn't allocate memory for depth buffer");
-	  }
-
-	  if (SplitVideo  &&  Cvar_VariableIntegerValue("r_anaglyphMode") == 19) {
-		  CL_OpenAVIForWriting(&afdDepthLeft, filename, qfalse, avi, avi ? qtrue : noSoundAvi, wav, tga, jpg, png, qtrue, qtrue, qtrue);
-		  CL_OpenAVIForWriting(&afdDepthRight, filename, qfalse, avi, avi ? qtrue : noSoundAvi, wav, tga, jpg, png, qtrue, qtrue, qfalse);
-	  } else {
-		  CL_OpenAVIForWriting(&afdDepth, filename, qfalse, avi, avi ? qtrue : noSoundAvi, wav, tga, jpg, png, qtrue, qfalse, qfalse);
-	  }
-  }
-
-  if (SplitVideo) {
-	  ExtraVideoBuffer = malloc(18 + cls.glconfig.vidWidth * cls.glconfig.vidHeight * 4);
-	  if (!ExtraVideoBuffer) {
-		  Com_Error(ERR_DROP, "Couldn't allocate memory for extra video buffer");
-	  }
-	  CL_OpenAVIForWriting(&afdLeft, filename, qfalse, avi, avi ? qtrue : noSoundAvi, wav, tga, jpg, png, qfalse, qtrue, qtrue);
-	  CL_OpenAVIForWriting(&afdRight, filename, qfalse, avi, avi ? qtrue : noSoundAvi, wav, tga, jpg, png, qfalse, qtrue, qfalse);
-  }
-  //Com_Printf("^2video cl_aviFrameRate %d\n", cl_aviFrameRate->integer);
-  CL_OpenAVIForWriting(&afdMain, filename, qfalse, avi, noSoundAvi, wav, tga, jpg, png, qfalse, qfalse, qfalse);
-
-  if (CL_VideoRecording(&afdMain)) {
-	  s_soundtime = s_paintedtime;
-  }
-}
-
-/*
-===============
-CL_StopVideo_f
-===============
-*/
-void CL_StopVideo_f( void )
-{
-	if (Video_DepthBuffer) {
-		CL_CloseAVI(&afdDepth, qfalse);
-		CL_CloseAVI(&afdDepthLeft, qfalse);
-		CL_CloseAVI(&afdDepthRight, qfalse);
-		free(Video_DepthBuffer);
-		Video_DepthBuffer = NULL;
-	}
-
-	if (SplitVideo) {
-		CL_CloseAVI(&afdLeft, qfalse);
-		CL_CloseAVI(&afdRight, qfalse);
-		free(ExtraVideoBuffer);
-		ExtraVideoBuffer = NULL;
-	}
-
-	CL_CloseAVI(&afdMain, qfalse);
-}
-
 static void fast_forward_demo (double wantedTime)
 {
 	int loopCount;
@@ -7008,9 +6859,7 @@ void CL_Init ( void ) {
 	Cmd_AddCommand ("fs_openedList", CL_OpenedPK3List_f );
 	Cmd_AddCommand ("fs_referencedList", CL_ReferencedPK3List_f );
 	//Cmd_AddCommand ("model", CL_SetModel_f );
-	//Cmd_AddCommand ("headmodel", CL_SetHeadModel_f );
-	Cmd_AddCommand ("video", CL_Video_f );
-	Cmd_AddCommand ("stopvideo", CL_StopVideo_f );
+	//Cmd_AddCommand ("headmodel", CL_SetHeadModel_f );		
 
 	if( !com_dedicated->integer ) {
 		Cmd_AddCommand ("sayto", CL_Sayto_f );
