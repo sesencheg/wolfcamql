@@ -1949,7 +1949,6 @@ void RE_SaveJPG(char * filename, int quality, int image_width, int image_height,
 size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality,
 		int image_width, int image_height, byte *image_buffer, int padding);
 qboolean SavePNG (const char *name, byte *data, int width, int height, int bytedepth);
-void RE_TakeVideoFrame (aviFileData_t *afd, int width, int height, byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg, qboolean avi, qboolean tga, qboolean jpg, qboolean png, int picCount, char *givenFileName);
 
 void RE_Get_Advertisements(int *num, float *verts, char shaders[][MAX_QPATH]);
 void RE_BeginHud (void);
