@@ -3418,9 +3418,6 @@ CL_ShutdownAll
 void CL_ShutdownAll(qboolean shutdownRef)
 {
 
-	if(CL_VideoRecording(&afdMain))
-		CL_StopVideo_f();
-
 	if(clc.demorecording)
 		CL_StopRecord_f();
 
@@ -3606,27 +3603,6 @@ void CL_Disconnect( qboolean showMainMenu ) {
 
 	if ( !com_cl_running || !com_cl_running->integer ) {
 		return;
-	}
-
-	// Stop recording any video
-	if (CL_VideoRecording(&afdMain)) {
-		// Finish rendering current frame
-		SCR_UpdateScreen( );
-		CL_CloseAVI(&afdMain, qfalse);
-		if (Video_DepthBuffer) {
-			CL_CloseAVI(&afdDepth, qfalse);
-			CL_CloseAVI(&afdDepthLeft, qfalse);
-			CL_CloseAVI(&afdDepthRight, qfalse);
-			free(Video_DepthBuffer);
-			Video_DepthBuffer = NULL;
-		}
-
-		if (SplitVideo) {
-			CL_CloseAVI(&afdLeft, qfalse);
-			CL_CloseAVI(&afdRight, qfalse);
-			free(ExtraVideoBuffer);
-			ExtraVideoBuffer = NULL;
-		}
 	}
 
 	Com_Printf("disconnect\n");
