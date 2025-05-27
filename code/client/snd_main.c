@@ -284,10 +284,6 @@ void S_Update( void )
 		}
 	}
 
-	if (CL_VideoRecording(&afdMain)  &&  (cl_freezeDemoPauseVideoRecording->integer  &&  cl_freezeDemo->integer)) {
-		return;
-	}
-
 	if( si.Update ) {
 		si.Update( );
 	}
