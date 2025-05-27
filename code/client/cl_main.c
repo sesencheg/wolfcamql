@@ -4199,23 +4199,6 @@ void CL_Vid_Restart_f (void)
 	state = clc.state;
 
 	// Settings may have changed so stop recording now
-	if(CL_VideoRecording(&afdMain)) {
-		CL_CloseAVI(&afdMain, qfalse);
-		if (Video_DepthBuffer) {
-			CL_CloseAVI(&afdDepth, qfalse);
-			CL_CloseAVI(&afdDepthLeft, qfalse);
-			CL_CloseAVI(&afdDepthRight, qfalse);
-			free(Video_DepthBuffer);
-			Video_DepthBuffer = NULL;
-		}
-
-		if (SplitVideo) {
-			CL_CloseAVI(&afdLeft, qfalse);
-			CL_CloseAVI(&afdRight, qfalse);
-			free(ExtraVideoBuffer);
-			ExtraVideoBuffer = NULL;
-		}
-	}
 
 	if(clc.demorecording)
 		CL_StopRecord_f();
