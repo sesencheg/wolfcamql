@@ -496,7 +496,7 @@ This will be called twice if rendering in stereo mode
 void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 	qboolean uiFullscreen;
 
-	re.BeginFrame(stereoFrame, false);
+	re.BeginFrame(stereoFrame, qfalse);
 
 	uiFullscreen = (uivm && VM_Call( uivm, UI_IS_FULLSCREEN ));
 
