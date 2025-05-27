@@ -3454,9 +3454,6 @@ int Com_TimeVal(int minMsec)
 
 //extern qboolean CL_VideoRecording( void );
 
-#ifndef DEDICATED
-#include "../client/cl_avi.h"
-#endif
 
 /*
 =================

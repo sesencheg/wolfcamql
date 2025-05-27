@@ -22,7 +22,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // cl_main.c  -- client main loop
 
 #include "client.h"
-#include "cl_avi.h"
 #include "keys.h"
 #include "snd_local.h"
 #include "../sys/sys_local.h"
