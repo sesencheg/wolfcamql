@@ -809,16 +809,6 @@ void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg);	//int length, const byte
 qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
 
 //
-// cl_avi.c
-//
-qboolean CL_OpenAVIForWriting( const char *filename );
-void CL_TakeVideoFrame (aviFileData_t *afd);
-void CL_WriteAVIVideoFrame( const byte *imageBuffer, int size );
-void CL_WriteAVIAudioFrame (aviFileData_t *afd, const byte *pcmBuffer, int size);
-qboolean CL_CloseAVI( void );
-//qboolean CL_VideoRecording (aviFileData_t *afd);
-
-//
 // cl_main.c
 //
 void CL_WriteDemoMessage ( msg_t *msg, int headerBytes );

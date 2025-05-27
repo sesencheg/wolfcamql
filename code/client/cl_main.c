@@ -186,14 +186,6 @@ serverStatus_t cl_serverStatusList[MAX_SERVERSTATUSREQUESTS];
 
 double Overf = 0.0;
 
-aviFileData_t afdMain;
-aviFileData_t afdLeft;
-aviFileData_t afdRight;
-
-aviFileData_t afdDepth;
-aviFileData_t afdDepthLeft;
-aviFileData_t afdDepthRight;
-
 GLfloat *Video_DepthBuffer = NULL;
 byte *ExtraVideoBuffer = NULL;
 qboolean SplitVideo = qfalse;
