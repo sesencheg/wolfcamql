@@ -199,7 +199,7 @@ typedef struct {
 	int		(*CIN_PlayCinematic)( const char *arg0, int xpos, int ypos, int width, int height, int bits);
 	e_status (*CIN_RunCinematic) (int handle);
 
-	void	(*CL_WriteAVIVideoFrame)(aviFileData_t *afd, const byte *buffer, int size);
+	void	(*CL_WriteAVIVideoFrame)( const byte *buffer, int size );
 
 	// input event handling
 	void	(*IN_Init)( void *windowData );
