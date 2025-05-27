@@ -853,6 +853,38 @@ qboolean CL_OpenAVIForWriting (aviFileData_t *afd, const char *fileName, qboolea
   return qtrue;
 }
 
+
+/*
+===============
+CL_CheckFileSize
+===============
+*/
+static qboolean CL_CheckFileSize( int bytesToAdd )
+{
+  unsigned int newFileSize;
+
+  newFileSize =
+    afd.fileSize +                // Current file size
+    bytesToAdd +                  // What we want to add
+    ( afd.numIndices * 16 ) +     // The index
+    4;                            // The index size
+
+  // I assume all the operating systems
+  // we target can handle a 2Gb file
+  if( newFileSize > INT_MAX )
+  {
+    // Close the current file...
+    CL_CloseAVI( );
+
+    // ...And open a new one
+    CL_OpenAVIForWriting( va( "%s_", afd.fileName ) );
+
+    return qtrue;
+  }
+
+  return qfalse;
+}
+
 /*
 ===============
 CL_CheckRiffSize
