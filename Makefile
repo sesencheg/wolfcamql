@@ -1168,7 +1168,7 @@ ifeq ($(PLATFORM),emscripten)
 
     # add extra freetype directories since they changed header locations
     FREETYPE_CFLAGS += -I/usr/include/freetype2 -I/usr/include/freetype2/freetype
-    FREETYPE_LIBS = -lfreetype
+    #FREETYPE_LIBS = -lfreetype
   endif
 
   ifneq ($(findstring /emcc,$(CC)),/emcc)
