@@ -3549,11 +3549,7 @@ void Com_Frame( void ) {
 		//if(timeRemaining == 0)
 		//	timeRemaining = 1;
 
-#ifndef DEDICATED
-		if (com_idleSleep->integer  &&  !CL_VideoRecording(&afdMain)) {
-#else
 		if (com_idleSleep->integer) {
-#endif
 			if (timeRemaining > 1) {
 				static int count = 0;
 
