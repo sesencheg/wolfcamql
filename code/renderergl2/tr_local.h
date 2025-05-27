@@ -2718,7 +2718,7 @@ image_t *R_CreateImage2( const char *name, byte *pic, int width, int height, GLe
 
 void RE_SetPathLines (int *numCameraPoints, cameraPoint_t *cameraPoints, int *numSplinePoints, vec3_t *splinePoints, const vec4_t color);
 void R_CreatePlayerColorSkinImages (qboolean force);
-void R_MME_Init (void);
+
 void RE_Get_Advertisements(int *num, float *verts, char shaders[][MAX_QPATH]);
 void RE_BeginHud (void);
 

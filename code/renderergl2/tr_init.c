@@ -2427,9 +2427,7 @@ void R_Init( void ) {
 
 	R_InitFreeType();
 
-	R_InitQueries();
-
-	R_MME_Init();
+	R_InitQueries();	
 
 	// to show update for color skins
 	if (glRefConfig.framebufferObject) {

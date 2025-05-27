@@ -2166,9 +2166,7 @@ void R_Init( void ) {
 
 	R_ModelInit();
 
-	R_InitFreeType();
-
-	R_MME_Init();
+	R_InitFreeType();	
 
 	err = qglGetError();
 	if ( err != GL_NO_ERROR )
