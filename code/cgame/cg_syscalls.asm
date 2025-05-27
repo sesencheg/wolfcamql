@@ -148,5 +148,3 @@ equ trap_GetLastServerTime -151
 equ trap_GetRoundStartTimes -152
 equ trap_GetTeamSwitchTime -153
 equ trap_R_BeginHud -154
-equ trap_R_UpdateDof -155
-

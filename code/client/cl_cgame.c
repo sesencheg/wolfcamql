@@ -1313,10 +1313,6 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 		re.BeginHud();
 		return 0;
 
-	case CG_R_UPDATE_DOF:
-		re.UpdateDof(VMF(1), VMF(2));
-		return 0;
-
 	case CG_DRAW_CONSOLE_LINES:
 		Con_DrawNotify();
 		return 0;

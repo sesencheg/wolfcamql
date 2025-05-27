@@ -2612,7 +2612,6 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.GetShaderImageData = RE_GetShaderImageData;
 	re.AddRefEntityPtrToScene = RE_AddRefEntityPtrToScene;
 	re.BeginHud = RE_BeginHud;
-	re.UpdateDof = RE_UpdateDof;
-
+	
 	return &re;
 }
