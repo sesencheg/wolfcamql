@@ -41,53 +41,6 @@ static void swap_bgr (byte *buffer, int width, int height, qboolean hasAlpha)
 	}
 }
 
-void R_MME_GetDepth (byte *output)
-{
-	float focusStart, focusEnd, focusMul;
-	float zBase, zAdd, zRange;
-	int i, pixelCount;
-	byte *temp;
-
-	if (mme_depthRange->value <= 0)  {
-		return;
-	}
-
-	pixelCount = glConfig.vidWidth * glConfig.vidHeight;
-
-	focusStart = mme_depthFocus->value - mme_depthRange->value;
-	focusEnd = mme_depthFocus->value + mme_depthRange->value;
-	focusMul = 255.0f / (2 * mme_depthRange->value);
-
-	zRange = backEnd.viewParms.zFar - r_znear->value;
-	zBase = ( backEnd.viewParms.zFar + r_znear->value ) / zRange;
-	zAdd =  ( 2 * backEnd.viewParms.zFar * r_znear->value ) / zRange;
-
-	//temp = (byte *)ri.Hunk_AllocateTempMemory( pixelCount * sizeof( float ) );
-	temp = (byte *)*ri.Video_DepthBuffer;
-	temp += 18;
-
-	qglDepthRange( 0.0f, 1.0f );
-	qglReadPixels( 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_DEPTH_COMPONENT, GL_FLOAT, (GLfloat *)temp );
-	/* Could probably speed this up a bit with SSE but frack it for now */
-	for ( i=0 ; i < pixelCount; i++ ) {
-		/* Read from the 0 - 1 depth */
-		GLfloat zVal = ((GLfloat *)temp)[i];
-		int outVal;
-		/* Back to the original -1 to 1 range */
-		zVal = zVal * 2.0f - 1.0f;
-		/* Back to the original z values */
-		zVal = zAdd / ( zBase - zVal );
-		/* Clip and scale the range that's been selected */
-		if (zVal <= focusStart)
-			outVal = 0;
-		else if (zVal >= focusEnd)
-			outVal = 255;
-		else
-			outVal = (zVal - focusStart) * focusMul;
-		output[i] = outVal;
-	}
-	//ri.Hunk_FreeTempMemory( temp );
-}
 
 /*
 ==================
