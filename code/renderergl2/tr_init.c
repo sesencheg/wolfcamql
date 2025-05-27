@@ -2601,8 +2601,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.GetEntityToken = R_GetEntityToken;
 	re.inPVS = R_inPVS;
 
-	re.TakeVideoFrame = RE_TakeVideoFrame;
-
+	
 	// wolfcamql
 	re.SetPathLines = RE_SetPathLines;
 	re.GetGlConfig = RE_GetGlConfig;
