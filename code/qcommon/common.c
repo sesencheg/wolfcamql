@@ -3526,12 +3526,6 @@ void Com_Frame( void ) {
 		minMsec = 1;
 	}
 
-#ifndef DEDICATED
-	if (CL_VideoRecording(&afdMain)) {
-		minMsec = 1;
-	}
-#endif
-
 	msec = minMsec;
 	do {
 		int timeRemaining = minMsec - msec;
