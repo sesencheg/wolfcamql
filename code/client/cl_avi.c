@@ -561,298 +561,109 @@ Creates an AVI file and gets it into a state where
 writing the actual data can begin
 ===============
 */
-
-// us:  called internally if odml isn't used and a series of avi files is
-// written for one recording
-
-qboolean CL_OpenAVIForWriting (aviFileData_t *afd, const char *fileName, qboolean us, qboolean avi, qboolean noSoundAvi, qboolean wav, qboolean tga, qboolean jpg, qboolean png, qboolean depth, qboolean split, qboolean left)
+qboolean CL_OpenAVIForWriting( const char *fileName )
 {
-    byte *cBuffer, *eBuffer;
-    int size;
-    fileHandle_t wf;
-    int vcount;
-    int pcount;
-    char sbuf[MAX_QPATH];
-    //int i;
-    int startTime;
+  if( afd.fileOpen )
+    return qfalse;
 
-    if (afd->recording) {
-        Com_Printf("^1CL_OpenAVIForWriting() already recording\n");
-        return qfalse;
-    }
-
-  if (!us) {
-      afd->PcmBytesInBuffer = 0;  // audio static buffer
-  }
-
-  //Com_Printf("^2CL_OpenAVIForWriting(%s)\n", fileName);
-
-#ifdef _FILE_OFFSET_BITS
-  //Com_Printf("file offset bits: %d\n", _FILE_OFFSET_BITS);
-#endif
-
-  cBuffer = afd->cBuffer;
-  eBuffer = afd->eBuffer;
-  wf = afd->wavFile;
-  vcount = afd->vidFileCount;
-  pcount = afd->picCount;
-  startTime = afd->startTime;
-  Q_strncpyz(sbuf, afd->givenFileName, MAX_QPATH);
-
-  Com_Memset(afd, 0, sizeof(aviFileData_t));
-
-  if (us) {
-      afd->cBuffer = cBuffer;
-      afd->eBuffer = eBuffer;
-      afd->wavFile = wf;
-      afd->vidFileCount = vcount + 1;
-      afd->picCount = pcount;
-      afd->startTime = startTime;
-      Q_strncpyz(afd->givenFileName, sbuf, MAX_QPATH);
-  } else {
-      afd->startTime = cls.realtime;
-  }
-
-  afd->avi = avi;
-  afd->wav = wav;
-  afd->tga = tga;
-  afd->jpg = jpg;
-  afd->png = png;
-  afd->noSoundAvi = noSoundAvi;
-  if (noSoundAvi) {
-      afd->avi = qtrue;
-  }
-  afd->depth = depth;
-  afd->split = split;
-  afd->left = left;
+  Com_Memset( &afd, 0, sizeof( aviFileData_t ) );
 
   // Don't start if a framerate has not been chosen
-  if( cl_aviFrameRate->integer <= 0 ) {
-      Com_Printf( S_COLOR_RED "cl_aviFrameRate must be >= 1\n" );
-      return qfalse;
-  }
-
-  //Q_strncpyz( afd->fileName, fileName, MAX_QPATH );
-
-
-  if (!us) {
-      if (!*fileName) {
-          //Com_sprintf(afd->givenFileName, MAX_QPATH, "%d", Sys_Milliseconds() + sys_timeBase);
-          Com_sprintf(afd->givenFileName, MAX_QPATH, "%d", (unsigned int)time(NULL));
-      } else {
-          Q_strncpyz( afd->givenFileName, fileName, MAX_QPATH );
-      }
-      if (depth) {
-          afd->depth = qtrue;
-          Q_strcat(afd->givenFileName, sizeof(afd->givenFileName), "-depth");
-      }
-      if (split) {
-          afd->split = qtrue;
-          if (left) {
-              afd->left = qtrue;
-              Q_strcat(afd->givenFileName, sizeof(afd->givenFileName), "-left");
-          } else {
-              afd->left = qfalse;
-              Q_strcat(afd->givenFileName, sizeof(afd->givenFileName), "-right");
-          }
-      }
-      //Com_Printf("^3record: %s\n", afd->givenFileName);
-  } else {
-      //Q_strncpyz(afd->givenFileName, afd->fileName, MAX_QPATH);
-  }
-
-  Com_sprintf(afd->fileName, MAX_QPATH, "videos/%s-%04d.%s", afd->givenFileName, afd->vidFileCount, cl_aviExtension->string);
-  //Com_Printf("%s\n", afd->fileName);
-
-  if( ( afd->f = FS_FOpenFileWrite( afd->fileName ) ) <= 0 ) {
-      Com_Printf("CL_OpenAVIForWriting()  couldn't open video file\n");
-      return qfalse;
-  }
-
-  if( ( afd->idxF = FS_FOpenFileWrite(va("%s%s", afd->fileName, INDEX_FILENAME_EXT))) <= 0 )
+  if( cl_aviFrameRate->integer <= 0 )
   {
-      Com_Printf("CL_OpenAVIForWriting() couldn't open standard index file '%s'\n", va("%s%s", afd->fileName, INDEX_FILENAME_EXT));
-      FS_FCloseFile( afd->f );
-      return qfalse;
+    Com_Printf( S_COLOR_RED "cl_aviFrameRate must be >= 1\n" );
+    return qfalse;
   }
-  if( ( afd->idxVF = FS_FOpenFileWrite(va("%s%s", afd->fileName, INDEX_VIDEO_FILENAME_EXT))) <= 0)
+
+  if( ( afd.f = FS_FOpenFileWrite( fileName ) ) <= 0 )
+    return qfalse;
+
+  if( ( afd.idxF = FS_FOpenFileWrite(
+          va( "%s" INDEX_FILE_EXTENSION, fileName ) ) ) <= 0 )
   {
-      Com_Printf("CL_OpenAVIForWriting() couldn't open video index file\n");
-      FS_FCloseFile( afd->f );
-      FS_FCloseFile(afd->idxF);
-      return qfalse;
-  }
-  if( ( afd->idxAF = FS_FOpenFileWrite(va("%s%s", afd->fileName, INDEX_AUDIO_FILENAME_EXT))) <= 0)
-  {
-      Com_Printf("CL_OpenAVIForWriting() couldn't open audio index file\n");
-      FS_FCloseFile( afd->f );
-      FS_FCloseFile(afd->idxF);
-      FS_FCloseFile(afd->idxVF);
-      return qfalse;
+    FS_FCloseFile( afd.f );
+    return qfalse;
   }
 
+  Q_strncpyz( afd.fileName, fileName, MAX_QPATH );
 
-  //Com_Printf("getting stream handle\n");
-  afd->file = FS_FileForHandle(afd->f);
-  //Com_Printf("file %p  f:%d\n", afd->file, afd->f);
-  afd->frameRate = cl_aviFrameRate->integer;
-  afd->framePeriod = (int)( 1000000.0f / afd->frameRate );
-  afd->width = cls.glconfig.vidWidth;
-  afd->height = cls.glconfig.vidHeight;
+  afd.frameRate = cl_aviFrameRate->integer;
+  afd.framePeriod = (int)( 1000000.0f / afd.frameRate );
+  afd.width = cls.glconfig.vidWidth;
+  afd.height = cls.glconfig.vidHeight;
 
-  //if (cl_aviUseOpenDml->integer) {
-  if (cl_aviAllowLargeFiles->integer) {
-      afd->useOpenDml = qtrue;
-      //Com_Printf("opendml large avi support\n");
-  } else {
-      afd->useOpenDml = qfalse;
-      //Com_Printf("regular avi (size limit)\n");
-  }
+  if( cl_aviMotionJpeg->integer )
+    afd.motionJpeg = qtrue;
+  else
+    afd.motionJpeg = qfalse;
 
-  if (!Q_stricmp(cl_aviCodec->string, "mjpeg")) {
-      afd->codec = CODEC_MJPEG;
-  } else if (!Q_stricmp(cl_aviCodec->string, "huffyuv")) {
-      afd->codec = CODEC_HUFFYUV;
-  } else {
-      afd->codec = CODEC_UNCOMPRESSED;
-  }
+  // Capture buffer stores RGB pixels but OpenGL ES reads RGBA and converts to RGB in-place.
+  // Encode buffer only needs to store RGB pixels.
+  // Allocate a bit more space for the capture buffer to account for possible
+  // padding at the end of pixel lines, and padding for alignment
+  #define MAX_PACK_LEN 16
+  afd.cBuffer = Z_Malloc((afd.width * 4 + MAX_PACK_LEN - 1) * afd.height + MAX_PACK_LEN - 1);
+  // raw avi files have pixel lines start on 4-byte boundaries
+  afd.eBuffer = Z_Malloc(PAD(afd.width * 3, AVI_LINE_PADDING) * afd.height);
 
-  if (!us  &&  (afd->width % 4) != 0) {
-      switch (afd->codec) {
-      case CODEC_MJPEG:
-          // pass, any width ok for mjpeg
-          break;
-      default:
-          Com_Printf(S_COLOR_YELLOW "WARNING:  width is not divisible by 4 and might result in problems with other video software\n");
-          break;
-      }
-  }
-
-  if (!us) {
-      // 18: header info, 16: alignment spacing
-      afd->cBuffer = malloc(afd->width * afd->height * 4 + 18 + 16);
-      if (!afd->cBuffer) {
-          Com_Error(ERR_DROP, "%s couldn't allocate memory for cBuffer", __FUNCTION__);
-      }
-      afd->eBuffer = malloc(afd->width * afd->height * 4 + 18 + 16);
-      if (!afd->eBuffer) {
-          Com_Error(ERR_DROP, "%s couldn't allocate memory for eBuffer", __FUNCTION__);
-      }
-  }
-
-  afd->a.rate = dma.speed;
-  afd->a.format = WAV_FORMAT_PCM;
-  afd->a.channels = dma.channels;
+  afd.a.rate = dma.speed;
+  afd.a.format = WAV_FORMAT_PCM;
+  afd.a.channels = dma.channels;
   /* !!! FIXME: if CL_WriteAVIAudioFrame() is ever called from somewhere other
      !!! FIXME:  than S_TransferStereo16(), we will need to handle/convert
      !!! FIXME:  float32 samples for AVI writing. */
-  afd->a.bits = dma.samplebits;
-  afd->a.sampleSize = ( afd->a.bits / 8 ) * afd->a.channels;
+  afd.a.bits = dma.samplebits;
+  afd.a.sampleSize = ( afd.a.bits / 8 ) * afd.a.channels;
 
-#if 0
-  if( afd->a.rate % afd->frameRate )
+  if( afd.a.rate % afd.frameRate )
   {
-    int suggestRate = afd->frameRate;
+    int suggestRate = afd.frameRate;
 
-    while( ( afd->a.rate % suggestRate ) && suggestRate >= 1 )
+    while( ( afd.a.rate % suggestRate ) && suggestRate >= 1 )
       suggestRate--;
 
-    if (!afd->noSoundAvi) {
-        Com_Printf( S_COLOR_YELLOW "WARNING: cl_aviFrameRate is not a divisor of the audio rate, suggest %d\n", suggestRate );
-    }
+    Com_Printf( S_COLOR_YELLOW "WARNING: cl_aviFrameRate is not a divisor "
+        "of the audio rate, suggest %d\n", suggestRate );
   }
-#endif
 
-  if( !Cvar_VariableIntegerValue( "s_initsound" ) ) {
-    afd->audio = qfalse;
-  } else if( Q_stricmp( Cvar_VariableString( "s_backend" ), "OpenAL" ) ) {
-      if( afd->a.bits != 16 || afd->a.channels != 2 ) {
-        Com_Printf( S_COLOR_YELLOW "WARNING: Audio format of %d bit/%d channels not supported", afd->a.bits, afd->a.channels );
-        afd->audio = qfalse;
-      } else {
-        afd->audio = qtrue;
-      }
-  } else {
-    afd->audio = qfalse;
+  if( !Cvar_VariableIntegerValue( "s_initsound" ) )
+  {
+    afd.audio = qfalse;
+  }
+  else if( Q_stricmp( Cvar_VariableString( "s_backend" ), "OpenAL" ) )
+  {
+    if( afd.a.bits != 16 || afd.a.channels != 2 )
+    {
+      Com_Printf( S_COLOR_YELLOW "WARNING: Audio format of %d bit/%d channels not supported",
+          afd.a.bits, afd.a.channels );
+      afd.audio = qfalse;
+    }
+    else
+      afd.audio = qtrue;
+  }
+  else
+  {
+    afd.audio = qfalse;
     Com_Printf( S_COLOR_YELLOW "WARNING: Audio capture is not supported "
         "with OpenAL. Set s_useOpenAL to 0 for audio capture\n" );
   }
 
-  if (afd->noSoundAvi) {
-      afd->audio = qfalse;
-  }
-
-  //FIXME testing odml
-  if (Cvar_VariableIntegerValue("testodml")) {
-      afd->newRiffOrCloseFileSize = (1024 * 1024) * Cvar_VariableIntegerValue("testodml");
-  } else {
-      afd->newRiffOrCloseFileSize = (1024 * 1024) * 950;  //950;  //(1024 * 1024) * 20;  //(1024 * 1024 * 1024);  //FIXME  base it on sample sizes subtracted from defined value
-  }
-
-  if (!us  &&  afd->codec == CODEC_HUFFYUV) {
-      afd->AC = calloc(1, sizeof(AVCodecContext));
-      if (!afd->AC) {
-          Com_Error(ERR_DROP, "%s couldn't allocate memory for codec", __FUNCTION__);
-      }
-      afd->AC->priv_data = calloc(1, sizeof(HYuvContext));
-      //afd->AC->priv_data = calloc(1, 1024 * 1024);  //FIXME size and free
-      if (!afd->AC->priv_data) {
-          Com_Error(ERR_DROP, "%s couldn't allocate memory for codec private data", __FUNCTION__);
-      }
-      afd->AC->width = afd->width;  //800;
-      afd->AC->height = afd->height;  //600;
-      huffyuv_encode_init(afd->AC);
-  }
-
   // This doesn't write a real header, but allocates the
   // correct amount of space at the beginning of the file
-  CL_CreateAVIHeader(afd);
+  CL_WriteAVIHeader( );
 
-  SafeFS_Write( buffer, bufIndex, afd->f );
-  afd->riffSize = bufIndex;
+  SafeFS_Write( buffer, bufIndex, afd.f );
+  afd.fileSize = bufIndex;
 
   bufIndex = 0;
-  START_CHUNK(afd, "idx1");
-  SafeFS_Write( buffer, bufIndex, afd->idxF );
+  START_CHUNK( "idx1" );
+  SafeFS_Write( buffer, bufIndex, afd.idxF );
 
-  CL_InitIndexes(afd);
+  afd.moviSize = 4; // For the "movi"
+  afd.fileOpen = qtrue;
 
-  afd->moviSize = 4; // For the "movi"
-  afd->fileOpen = qtrue;
-
-  afd->riffCount = 1;
-
-  // testing
-
-  if (!us  &&  wav  &&  afd == &afdMain) {
-      //Com_sprintf(sbuf, MAX_QPATH, "videos/%s.wav", afd->givenFileName);
-      Com_sprintf(sbuf, MAX_QPATH, "videos/%s.wav", afd->givenFileName);
-      afd->wavFile = FS_FOpenFileWrite(sbuf);
-      if (!afd->wavFile) {
-          Com_Printf("couldn't open wav file\n");
-      }
-
-      size = 0x7fffffff;  // bogus size
-
-      fwriteString("RIFF", afd->wavFile);
-      fwrite4(size, afd->wavFile);  // bogus size
-      fwriteString("WAVE", afd->wavFile);
-      fwriteString("fmt ", afd->wavFile);
-      fwrite4(16, afd->wavFile);  // format len
-      fwrite2(afd->a.format, afd->wavFile);  // WAVE_FORMAT_PCM
-      fwrite2(2, afd->wavFile);  // wChannels
-      fwrite4(afd->a.rate, afd->wavFile);  // sample rate
-      fwrite4((2 * afd->a.rate * (16 >> 3)), afd->wavFile);  // dwAvgBytesPerSec
-      fwrite2((2 * (16 >> 3)), afd->wavFile);  // wBlockAlign
-      fwrite2(16, afd->wavFile);  // bits per sample
-      fwriteString("data", afd->wavFile);
-      fwrite4(size - 44, afd->wavFile);
-  }
-
-  afd->recording = qtrue;
   return qtrue;
 }
-
 
 /*
 ===============
