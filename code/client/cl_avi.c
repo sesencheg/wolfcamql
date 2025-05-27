@@ -986,62 +986,50 @@ static void CL_WriteAVIVideoFrameReal (aviFileData_t *afd, const byte *imageBuff
 static byte *EncodeBuffer = NULL;
 static int EncodeBufferSize = 0;
 
-void CL_WriteAVIVideoFrame (aviFileData_t *afd, const byte *imageBuffer, int size)
+/*
+===============
+CL_WriteAVIVideoFrame
+===============
+*/
+void CL_WriteAVIVideoFrame( const byte *imageBuffer, int size )
 {
-    int newSize;
-    byte *newBuffer;
-    AVFrame VlcFrame;
-    int bufSize;
+  int   chunkOffset = afd.fileSize - afd.moviOffset - 8;
+  int   chunkSize = 8 + size;
+  int   paddingSize = PADLEN(size, 2);
+  byte  padding[ 4 ] = { 0 };
 
-    //FIXME
-    bufSize = afd->width * afd->height * 4 * 2;
-    if (!EncodeBuffer) {
-        EncodeBuffer = malloc(bufSize);
-        if (!EncodeBuffer) {
-            Com_Error(ERR_DROP, "%s couldn't allocate encode buffer", __FUNCTION__);
-        }
-        EncodeBufferSize = bufSize;
-    }
+  if( !afd.fileOpen )
+    return;
 
-    if (bufSize > EncodeBufferSize) {
-        EncodeBuffer = realloc(EncodeBuffer, bufSize);
-        if (!EncodeBuffer) {
-            Com_Error(ERR_DROP, "%s couldn't reallocate encode buffer", __FUNCTION__);
-        }
-        EncodeBufferSize = bufSize;
-    }
+  // Chunk header + contents + padding
+  if( CL_CheckFileSize( 8 + size + 2 ) )
+    return;
 
-    if (afd->codec == CODEC_HUFFYUV) {
-        int i;
-        byte *p;
+  bufIndex = 0;
+  WRITE_STRING( "00dc" );
+  WRITE_4BYTES( size );
 
-        p = (byte *)imageBuffer;
+  SafeFS_Write( buffer, 8, afd.f );
+  SafeFS_Write( imageBuffer, size, afd.f );
+  SafeFS_Write( padding, paddingSize, afd.f );
+  afd.fileSize += ( chunkSize + paddingSize );
 
-        //FIXME change codec so you don't have to swap bgr
-        for (i = 0;  i < size;  i += 3) {
-            int r, b;
+  afd.numVideoFrames++;
+  afd.moviSize += ( chunkSize + paddingSize );
 
-            r = p[i + 0];
-            b = p[i + 2];
+  if( size > afd.maxRecordSize )
+    afd.maxRecordSize = size;
 
-            p[i + 0] = b;
-            p[i + 2] = r;
-        }
+  // Index
+  bufIndex = 0;
+  WRITE_STRING( "00dc" );           //dwIdentifier
+  WRITE_4BYTES( 0x00000010 );       //dwFlags (all frames are KeyFrames)
+  WRITE_4BYTES( chunkOffset );      //dwOffset
+  WRITE_4BYTES( size );             //dwLength
+  SafeFS_Write( buffer, 16, afd.idxF );
 
-        VlcFrame.data[0] = (uint8_t *)imageBuffer;
-        VlcFrame.linesize[0] = afd->width * 3;
-
-        newSize = huffyuv_encode_frame(afd->AC, EncodeBuffer, EncodeBufferSize, &VlcFrame);
-        newBuffer = EncodeBuffer;
-        //Com_Printf("size  %d  ->  %d\n", size, newSize);
-    } else {
-        newSize = size;
-        newBuffer = (byte *)imageBuffer;
-    }
-
-    CL_WriteAVIVideoFrameReal(afd, newBuffer, newSize);
+  afd.numIndices++;
 }
-
 /*
 ===============
 CL_WriteAVIAudioFrame
