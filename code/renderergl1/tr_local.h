@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../renderercommon/tr_public.h"
 #include "../cgame/cg_camera.h"
 #include "../client/cl_avi.h"
-#include "../renderercommon/tr_mme.h"
+//#include "../renderercommon/tr_mme.h"
 
 #include "../renderercommon/qgl.h"
 #include "../renderercommon/iqm.h"
