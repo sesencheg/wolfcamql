@@ -1497,7 +1497,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 		if (r_ignoreEntityMergable->integer == 0) {
 			useMergable = qtrue;
-		} else if (r_ignoreEntityMergable->integer == 2  &&  mme_saveDepth->integer == 0) {
+		} else if (r_ignoreEntityMergable->integer == 2) {
 			useMergable = qtrue;
 		} else {
 			useMergable = qfalse;
@@ -2126,14 +2126,6 @@ const void	*RB_DrawSurfs( const void *data ) {
 		int i;
 		float x, y;
 		qboolean adjustOrigin = qfalse;
-
-		if ((tr.recordingVideo  ||  mme_dofVisualize->integer)  &&  mme_dofFrames->integer > 0) {
-			if (r_anaglyphMode->integer == 19  &&  *ri.SplitVideo  &&  !tr.leftRecorded) {
-				adjustOrigin = R_MME_JitterOrigin(&x, &y, qfalse);
-			} else {
-				adjustOrigin = R_MME_JitterOrigin(&x, &y, qtrue);
-			}
-		}
 
 		if (adjustOrigin) {
 			orientationr_t* or = &backEnd.viewParms.or;
@@ -3270,13 +3262,6 @@ void RB_ExecuteRenderCommands( const void *data ) {
 	tr.leftRecorded = qfalse;  // to break outer dof loop
 
 	//FIXME splitting rendering between world and hud will not work correctly when R_IssuePendingRenderCommands() is used  -- 2018-08-10 hack added to only run R_IssuePendingRenderCommands() at the end of frame
-
-	if (tr.recordingVideo  ||  mme_dofVisualize->integer) {
-		R_MME_CheckCvars(qfalse, &shotDataMain);
-		if (r_anaglyphMode->integer == 19  &&  *ri.SplitVideo) {
-			R_MME_CheckCvars(qfalse, &shotDataLeft);
-		}
-	}
 
 	t1 = ri.RealMilliseconds();
 	dataOrig = data;
