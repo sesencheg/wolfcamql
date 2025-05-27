@@ -215,14 +215,6 @@ typedef struct {
 	// video recording stuff
 	qboolean *SplitVideo;
 
-	aviFileData_t *afdMain;
-	aviFileData_t *afdLeft;
-	aviFileData_t *afdRight;
-
-	aviFileData_t *afdDepth;
-	aviFileData_t *afdDepthLeft;
-	aviFileData_t *afdDepthRight;
-
 	GLfloat **Video_DepthBuffer;
 	byte **ExtraVideoBuffer;
 
