@@ -45,7 +45,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <fcntl.h>
 #include <fenv.h>
 #include <time.h>
-#include <execinfo.h>
 
 //#define _GNU_SOURCE
 //#ifndef _GNU_SOURCE
