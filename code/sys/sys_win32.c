@@ -1052,7 +1052,7 @@ Sys_PlatformInit
 Windows specific initialisation
 ==============
 */
-void Sys_PlatformInit (qboolean useBacktrace, qboolean useConsoleOutput)
+void Sys_PlatformInit ( void )
 {
 	HMODULE bt;
 	OSVERSIONINFO vi;
