@@ -5886,8 +5886,6 @@ void CL_InitRef ( void ) {
 	ri.CIN_PlayCinematic = CIN_PlayCinematic;
 	ri.CIN_RunCinematic = CIN_RunCinematic;
 
-	ri.CL_WriteAVIVideoFrame = CL_WriteAVIVideoFrame;
-
 	ri.IN_Init = IN_Init;
 	ri.IN_Shutdown = IN_Shutdown;
 	ri.IN_Restart = IN_Restart;
@@ -5901,14 +5899,6 @@ void CL_InitRef ( void ) {
 
 	// video recording stuff
 	ri.SplitVideo = &SplitVideo;
-
-	ri.afdMain = &afdMain;
-	ri.afdLeft = &afdLeft;
-	ri.afdRight = &afdRight;
-
-	ri.afdDepth = &afdDepth;
-	ri.afdDepthLeft = &afdDepthLeft;
-	ri.afdDepthRight = &afdDepthRight;
 
 	ri.Video_DepthBuffer = &Video_DepthBuffer;
 	ri.ExtraVideoBuffer = &ExtraVideoBuffer;
