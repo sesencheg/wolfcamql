@@ -6492,9 +6492,7 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 		demo.viewFocus = 0;
 		demo.viewRadius = 0;
 	}
-
-	trap_R_UpdateDof(demo.viewFocus, demo.viewRadius);
-
+	
 	//FIXME not here?
 	if (!cg.videoRecording  &&  cg_q3mmeDofMarker.integer) {
 		CG_Q3mmeDofDraw(demo.play.time, demo.play.fraction);
