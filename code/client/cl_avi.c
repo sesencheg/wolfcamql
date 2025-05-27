@@ -52,7 +52,7 @@ static void CL_PadEndOfFile (const aviFileData_t *afd);
 static void CL_PadEndOfFileExt (const aviFileData_t *afd, int pad);
 
 
-//static aviFileData_t afd;
+static aviFileData_t afd;
 
 #define MAX_AVI_BUFFER (1024 * 24)
 
@@ -1030,6 +1030,7 @@ void CL_WriteAVIVideoFrame( const byte *imageBuffer, int size )
 
   afd.numIndices++;
 }
+
 /*
 ===============
 CL_WriteAVIAudioFrame
