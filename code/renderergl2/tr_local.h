@@ -2175,7 +2175,6 @@ void    R_RemapShader(const char *oldShader, const char *newShader, const char *
 void R_ClearRemappedShader (const char *shaderName);
 void R_ClearAllRemappedShaders_f (void);
 qhandle_t RE_GetSingleShader (void);
-void R_FontList_f (void);
 
 
 /*
