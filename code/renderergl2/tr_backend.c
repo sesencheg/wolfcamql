@@ -3449,7 +3449,7 @@ void RB_ExecuteRenderCommands( const void *data ) {
 				cmd.png = ri.afdLeft->png;
 				cmd.picCount = ri.afdMain->picCount - 1;
 				Q_strncpyz(cmd.givenFileName, ri.afdMain->givenFileName, MAX_QPATH);
-				RB_TakeVideoFrameCmd(&cmd, &shotDataLeft);
+				RB_TakeVideoFrameCmd(&cmd);
 				tr.leftRecorded = qtrue;
 			}
 
@@ -3535,42 +3535,6 @@ void RB_ExecuteRenderCommands( const void *data ) {
 
 	// video command is in it's own render list, so drawing doesn't always
 	// take place
-
-	/* Take and merge DOF frames */
-	if ((tr.recordingVideo  ||  mme_dofVisualize->integer)  &&  tr.drawSurfsCount) {
-		if (R_MME_MultiPassNext(qtrue)) {
-			R_InitNextFrameNoCommands();
-			goto videoCommandCheckDone;
-		}
-
-		// blit q3mme dof
-		if (mme_dofFrames->integer > 1  &&  (tr.recordingVideo  ||  mme_dofVisualize->integer)  &&  R_MME_GetPassData(qtrue)  &&  !shotDataMain.allocFailed) {
-			byte *buffer;
-			//int i, j;
-
-			buffer = R_MME_GetPassData(qtrue);
-
-#if 0  // testing
-			for (i = 0;  i < glConfig.vidHeight;  i++) {
-				for (j = 0;  j < glConfig.vidWidth;  j++) {
-					byte *p;
-					p = buffer + i * glConfig.vidWidth * 3 + j * 3;
-					if (j == glConfig.vidWidth / 2) {
-						p[0] = 255;
-						p[1] = 0;
-						p[2] = 0;
-					} else {
-						//p[0] = 0;
-						//p[1] = 0;
-						//p[2] = 0;
-					}
-				}
-			}
-#endif
-
-			RE_StretchRawRectScreen(buffer);
-		}
-	}
 
 	if (tr.drawSurfsCount) {
 		// screen map texture
