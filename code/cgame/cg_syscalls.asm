@@ -146,9 +146,8 @@ equ trap_Key_GetBindingBuf -149
 equ trap_Key_KeynumToStringBuf -150
 equ trap_R_GetGlyphInfo -151
 equ trap_GetLastServerTime -152
-equ trap_R_GetFontInfo -153
-equ trap_GetRoundStartTimes -154
-equ trap_GetTeamSwitchTime -155
-equ trap_R_BeginHud -156
-equ trap_R_UpdateDof -157
+equ trap_GetRoundStartTimes -153
+equ trap_GetTeamSwitchTime -154
+equ trap_R_BeginHud -155
+equ trap_R_UpdateDof -156
 

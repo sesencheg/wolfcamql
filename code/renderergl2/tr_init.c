@@ -2602,8 +2602,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	// wolfcamql
 	re.SetPathLines = RE_SetPathLines;
 	re.GetGlConfig = RE_GetGlConfig;
-	re.GetGlyphInfo = RE_GetGlyphInfo;
-	re.GetFontInfo = RE_GetFontInfo;
+	re.GetGlyphInfo = RE_GetGlyphInfo;	
 
 	re.GetSingleShader = RE_GetSingleShader;
 

@@ -294,7 +294,7 @@ static void CG_DrawChar( int x, int y, int width, int height, int ch ) {
 	//FIXME cgs.media.charsetFont is cgs.media.bigchar
 	
 	//trap_R_GetGlyphInfo(&cgs.media.charsetFont, ch, &glyph);
-	trap_R_GetGlyphInfo(&cgs.media.bigchar, ch, &glyph);
+	//trap_R_GetGlyphInfo(&cgs.media.bigchar, ch, &glyph);
 	
 #if 0
 	ch &= 255;
@@ -1121,7 +1121,7 @@ static int UI_ProportionalStringWidth( const char* str ) {
 		} else {
 			glyphInfo_t glyph;
 
-			trap_R_GetGlyphInfo(&cgs.media.qlfont24, codePoint, &glyph);
+			//trap_R_GetGlyphInfo(&cgs.media.qlfont24, codePoint, &glyph);
 			width += ((float)glyph.xSkip * ((float)PROP_HEIGHT / 24.0f));
 		}
 		s++;
@@ -1227,7 +1227,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, const vec
 			// adjust 24 point font to match prop font
 			adjScale = sizeScale * ((float)PROP_HEIGHT / 24.0);
 
-			trap_R_GetGlyphInfo(&cgs.media.qlfont24, codePoint, &glyph);
+			//trap_R_GetGlyphInfo(&cgs.media.qlfont24, codePoint, &glyph);
 			// draw from the bottom up
 			my = ay;
 			my += 24.0 * sizeScale;
@@ -1436,7 +1436,7 @@ int UI_DrawProportionalString3 (int x, int y, const char* str, int style, const 
 		} else {
 			glyphInfo_t glyph;
 
-			trap_R_GetGlyphInfo(&cgs.media.qlfont24, codePoint, &glyph);
+			//trap_R_GetGlyphInfo(&cgs.media.qlfont24, codePoint, &glyph);
 			width += ((float)glyph.xSkip * ((float)PROP_HEIGHT / 24.0f));
 		}
 

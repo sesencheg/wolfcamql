@@ -676,11 +676,6 @@ qboolean trap_R_GetGlyphInfo (const fontInfo_t *fontInfo, int charValue, glyphIn
 	return syscall(CG_R_GETGLYPHINFO, fontInfo, charValue, glyphOut);
 }
 
-qboolean trap_R_GetFontInfo (int fontId, fontInfo_t *font)
-{
-	return syscall(CG_R_GETFONTINFO, fontId, font);
-}
-
 void trap_GetRoundStartTimes (int *numRoundStarts, int *roundStarts)
 {
 	syscall(CG_GETROUNDSTARTTIMES, numRoundStarts, roundStarts);
