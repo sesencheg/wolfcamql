@@ -144,10 +144,9 @@ equ trap_Key_SetOverstrikeMode -147
 equ trap_Key_SetBinding -148
 equ trap_Key_GetBindingBuf -149
 equ trap_Key_KeynumToStringBuf -150
-equ trap_R_GetGlyphInfo -151
-equ trap_GetLastServerTime -152
-equ trap_GetRoundStartTimes -153
-equ trap_GetTeamSwitchTime -154
-equ trap_R_BeginHud -155
-equ trap_R_UpdateDof -156
+equ trap_GetLastServerTime -151
+equ trap_GetRoundStartTimes -152
+equ trap_GetTeamSwitchTime -153
+equ trap_R_BeginHud -154
+equ trap_R_UpdateDof -155
 

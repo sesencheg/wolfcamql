@@ -671,10 +671,6 @@ void trap_Key_KeynumToStringBuf (int keynum, char *buf, int buflen)
 	syscall(CG_KEY_KEYNUMTOSTRINGBUF, keynum, buf, buflen);
 }
 
-qboolean trap_R_GetGlyphInfo (const fontInfo_t *fontInfo, int charValue, glyphInfo_t *glyphOut)
-{
-	return syscall(CG_R_GETGLYPHINFO, fontInfo, charValue, glyphOut);
-}
 
 void trap_GetRoundStartTimes (int *numRoundStarts, int *roundStarts)
 {
