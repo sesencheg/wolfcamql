@@ -112,8 +112,6 @@ typedef struct {
 	qboolean (*GetEntityToken)( char *buffer, int size );
 	qboolean (*inPVS)( const vec3_t p1, const vec3_t p2 );
 
-	void (*TakeVideoFrame)(aviFileData_t *afd, int h, int w, byte* captureBuffer, byte *encodeBuffer, qboolean motionJpeg, qboolean avi, qboolean tga, qboolean jpg, qboolean png, int picCount, char *givenFileName);
-
 	void (*BeginHud)(void);
 	void (*UpdateDof)(float viewFocus, float viewRadius);
 
