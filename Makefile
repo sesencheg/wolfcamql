@@ -2033,7 +2033,6 @@ $(B)/$(AUTOUPDATER_BIN): $(Q3AUTOUPDATEROBJ)
 #############################################################################
 
 Q3OBJ = \
-  $(B)/client/cl_avi.o \
   $(B)/client/cl_camera.o \
   $(B)/client/cl_cgame.o \
   $(B)/client/cl_cin.o \
