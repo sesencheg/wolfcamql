@@ -3483,7 +3483,7 @@ void RB_ExecuteRenderCommands( const void *data ) {
 				cmd.png = ri.afdLeft->png;
 				cmd.picCount = ri.afdMain->picCount - 1;
 				Q_strncpyz(cmd.givenFileName, ri.afdMain->givenFileName, MAX_QPATH);
-				RB_TakeVideoFrameCmd(&cmd, &shotDataLeft);
+				RB_TakeVideoFrameCmd(&cmd);
 				tr.leftRecorded = qtrue;
 			}
 
@@ -3828,7 +3828,7 @@ void RB_ExecuteRenderCommands( const void *data ) {
 		case RC_VIDEOFRAME:
 			dprintf("r3 takevideoframe\n");
 			//ri.Printf(PRINT_ALL, "r3 takevideoframe\n");
-			data = RB_TakeVideoFrameCmd(data, &shotDataMain);
+			data = RB_TakeVideoFrameCmd(data);
 			break;
 		case RC_END_OF_LIST:
 			t2 = ri.RealMilliseconds();
