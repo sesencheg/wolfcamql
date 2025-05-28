@@ -1126,6 +1126,10 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 	case CG_R_REGISTERFONT:
 		re.RegisterFont( VMA(1), args[2], VMA(3));
 		return 0;
+	case CG_R_GETGLYPHINFO:
+		return re.GetGlyphInfo(VMA(1), args[2], VMA(3));		
+	case CG_R_GETFONTINFO:
+		return re.GetFontInfo(args[1], VMA(2));		
 	case CG_R_CLEARSCENE:
 		re.ClearScene();
 		return 0;

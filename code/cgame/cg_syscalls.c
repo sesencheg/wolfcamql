@@ -508,6 +508,11 @@ void trap_R_BeginHud (void)
 	syscall(CG_R_BEGIN_HUD);
 }
 
+void trap_R_UpdateDof (float viewFocus, float viewRadius)
+{
+	syscall(CG_R_UPDATE_DOF, PASSFLOAT(viewFocus), PASSFLOAT(viewRadius));
+}
+
 void trap_R_DrawConsoleLines (void)
 {
 	syscall(CG_DRAW_CONSOLE_LINES);
@@ -666,6 +671,15 @@ void trap_Key_KeynumToStringBuf (int keynum, char *buf, int buflen)
 	syscall(CG_KEY_KEYNUMTOSTRINGBUF, keynum, buf, buflen);
 }
 
+qboolean trap_R_GetGlyphInfo (const fontInfo_t *fontInfo, int charValue, glyphInfo_t *glyphOut)
+{
+	return syscall(CG_R_GETGLYPHINFO, fontInfo, charValue, glyphOut);
+}
+
+qboolean trap_R_GetFontInfo (int fontId, fontInfo_t *font)
+{
+	return syscall(CG_R_GETFONTINFO, fontId, font);
+}
 
 void trap_GetRoundStartTimes (int *numRoundStarts, int *roundStarts)
 {

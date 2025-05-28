@@ -559,3 +559,21 @@ void R_DoneFreeType(void) {
 	registeredFontCount = 0;
 }
 
+qboolean RE_GetGlyphInfo (fontInfo_t *fontInfo, int charValue, glyphInfo_t *glyphOut)
+{
+	return qfalse;
+}
+
+qboolean RE_GetFontInfo (int fontId, fontInfo_t *font)
+{
+	int i;
+
+	if (font == NULL) {
+		ri.Printf(PRINT_WARNING, "%s: font == NULL\n", __FUNCTION__);
+		return qfalse;
+	}
+
+	ri.Printf(PRINT_WARNING, "%s: couldn't find font for id %d\n", __FUNCTION__, fontId);
+
+	return qfalse;
+}

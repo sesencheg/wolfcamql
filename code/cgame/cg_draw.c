@@ -1418,8 +1418,13 @@ float CG_Text_Pic_Width (const floatint_t *text, float scale, float iconScale, i
 				} else if (s[0].i == TEXT_PIC_PAINT_XOFFSET) {
 					//FIXME maybe not
 
-				} else if (s[0].i == TEXT_PIC_PAINT_FONT) {					
-					font = fontOrig;					
+				} else if (s[0].i == TEXT_PIC_PAINT_FONT) {
+					if (!trap_R_GetFontInfo(s[1].i, &newFont)) {
+						Com_Printf("^3CG_Text_Pic_Width: couldn't get new font info for %d\n", s[1].i);
+						font = fontOrig;
+					} else {
+						font = &newFont;
+					}
 
 					//FIXME duplicate code
 
@@ -1500,7 +1505,8 @@ float CG_Text_Pic_Width (const floatint_t *text, float scale, float iconScale, i
 				}
 			}
 
-			
+			trap_R_GetGlyphInfo(font, cp, &glyph);
+
 			if ( Q_IsColorStringPicString(s) ) {
 				if (cgs.osp) {
 					if (s[1].i == 'x'  ||  s[1].i == 'X') {
@@ -1638,7 +1644,7 @@ static float CG_Text_Width_orig (const char *text, float scale, int limit, const
 						s1++;
 					}
 				}
-				
+				trap_R_GetGlyphInfo(font, cp, &glyph);
 				out += glyph.xSkip;
 
 				s += bytes;
@@ -1747,7 +1753,7 @@ static float CG_Text_Height_orig (const char *text, float scale, int limit, cons
 						s1++;
 					}
 				}
-				
+				trap_R_GetGlyphInfo(font, cp, &glyph);
 				if (max < glyph.height) {
 					max = glyph.height;
 				}
@@ -1973,7 +1979,7 @@ void CG_Text_Paint (float x, float y, float scale, const vec4_t color, const cha
 				}
 			}
 			//FIXME do below
-			
+			trap_R_GetGlyphInfo(font, cp, &glyph);
 
 			if ( Q_IsColorString( s ) ) {
 				if (cgs.cpma) {
@@ -2251,8 +2257,12 @@ void CG_Text_Pic_Paint (float x, float y, float scale, const vec4_t color, const
 					y += s[1].f;
 				} else if (s[0].i == TEXT_PIC_PAINT_FONT) {
 
-					font = fontOrig;
-					
+					if (!trap_R_GetFontInfo(s[1].i, &newFont)) {
+						Com_Printf("^3CG_Text_Pic_Paint: couldn't get new font info for %d\n", s[1].i);
+						font = fontOrig;
+					} else {
+						font = &newFont;
+					}
 
 					//FIXME duplicate code
 
@@ -2341,8 +2351,9 @@ void CG_Text_Pic_Paint (float x, float y, float scale, const vec4_t color, const
 				}
 			}
 
-			//Com_Printf("cp: %d '%c'\n", cp, (unsigned char)cp);		
+			//Com_Printf("cp: %d '%c'\n", cp, (unsigned char)cp);
 			
+			trap_R_GetGlyphInfo(font, cp, &glyph);
 
 			if ( Q_IsColorStringPicString( s ) ) {
 				if (cgs.cpma) {
@@ -2613,7 +2624,8 @@ void CG_CreateNameSprite (float xf, float yf, float scale, const vec4_t color, c
 
 				codePoint = Q_GetCpFromUtf8(s, &numUtf8Bytes, &error);
 				s += (numUtf8Bytes - 1);
-				
+				//trap_R_GetGlyphInfo(font, *s & 255, &glyph);
+				trap_R_GetGlyphInfo(font, codePoint, &glyph);
 
 
 				trap_GetShaderImageDimensions(glyph.glyph, &fontImageWidth, &fontImageHeight);

@@ -1206,37 +1206,6 @@ void RB_TakeScreenshotJPEG(int x, int y, int width, int height, char *fileName)
 	ri.Hunk_FreeTempMemory(buffer);
 }
 
-/*
-==================
-RB_TakeScreenshotPNG
-==================
-*/
-void RB_TakeScreenshotPNG (int x, int y, int width, int height, char *fileName)
-{
-	byte		*buffer;
-
-	buffer = ri.Hunk_AllocateTempMemory(glConfig.vidWidth*glConfig.vidHeight*4);
-
-	if (!tr.usingFinalFrameBufferObject) {
-		//qglReadBuffer(GL_FRONT);
-	}
-
-	qglReadPixels( x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer );
-
-	if (!tr.usingFinalFrameBufferObject) {
-		//qglReadBuffer(GL_BACK);
-	}
-
-	// gamma correct
-	if ( glConfig.deviceSupportsGamma ) {
-		R_GammaCorrect( buffer, glConfig.vidWidth * glConfig.vidHeight * 4 );
-	}
-
-	ri.FS_WriteFile( fileName, buffer, 1 );		// create path
-	//RE_SaveJPG(fileName, r_jpegCompressionQuality->integer, glConfig.vidWidth, glConfig.vidHeight, buffer, 0);
-	SavePNG(fileName, buffer, glConfig.vidWidth, glConfig.vidHeight, 4);
-	ri.Hunk_FreeTempMemory( buffer );
-}
 
 /*
 ==================
@@ -1254,8 +1223,6 @@ const void *RB_TakeScreenshotCmd( const void *data ) {
 
 	if (cmd->type == SCREENSHOT_JPEG) {
 		RB_TakeScreenshotJPEG( cmd->x, cmd->y, cmd->width, cmd->height, cmd->fileName);
-	} else if (cmd->type == SCREENSHOT_PNG) {
-		RB_TakeScreenshotPNG(cmd->x, cmd->y, cmd->width, cmd->height, cmd->fileName);
 	} else {  // SCREENSHOT_TGA
 		RB_TakeScreenshot( cmd->x, cmd->y, cmd->width, cmd->height, cmd->fileName);
 	}

@@ -192,6 +192,7 @@ int			trap_Key_GetKey( const char *binding );
 void		trap_Key_GetBinding(int keynum, char *buffer);
 void		trap_Get_Advertisements(int *num, float *verts, char shaders[][MAX_QPATH]);
 void		trap_R_BeginHud (void);
+void trap_R_UpdateDof (float viewFocus, float viewRadius);
 
 void		trap_R_DrawConsoleLines (void);
 int			trap_GetLastExecutedServerCommand (void);
@@ -246,6 +247,8 @@ qboolean trap_Key_GetOverstrikeMode (void);
 void trap_Key_SetBinding (int keynum, const char *binding);
 void trap_Key_GetBindingBuf (int keynum, char *buf, int buflen);
 void trap_Key_KeynumToStringBuf (int keynum, char *buf, int buflen);
+qboolean trap_R_GetGlyphInfo (const fontInfo_t *fontInfo, int charValue, glyphInfo_t *glyphOut);
+qboolean trap_R_GetFontInfo (int fontId, fontInfo_t *font);
 void trap_GetRoundStartTimes (int *numRoundStarts, int *roundStarts);
 qboolean trap_GetTeamSwitchTime (int clientNum, int startTime, int *teamSwitchTime);
 #endif  // cg_syscalls_h_included

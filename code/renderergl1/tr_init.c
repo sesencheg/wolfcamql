@@ -1128,37 +1128,6 @@ void RB_TakeScreenshotJPEG( int x, int y, int width, int height, char *fileName 
 	ri.Hunk_FreeTempMemory( buffer );
 }
 
-/*
-==================
-RB_TakeScreenshotPNG
-==================
-*/
-void RB_TakeScreenshotPNG (int x, int y, int width, int height, char *fileName)
-{
-	byte		*buffer;
-
-	buffer = ri.Hunk_AllocateTempMemory(glConfig.vidWidth*glConfig.vidHeight*4);
-
-	if (!tr.usingFinalFrameBufferObject) {
-		//qglReadBuffer(GL_FRONT);
-	}
-
-	qglReadPixels( x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer );
-
-	if (!tr.usingFinalFrameBufferObject) {
-		//qglReadBuffer(GL_BACK);
-	}
-
-	// gamma correct
-	if ( glConfig.deviceSupportsGamma ) {
-		R_GammaCorrect( buffer, glConfig.vidWidth * glConfig.vidHeight * 4 );
-	}
-
-	ri.FS_WriteFile( fileName, buffer, 1 );		// create path
-	//RE_SaveJPG(fileName, r_jpegCompressionQuality->integer, glConfig.vidWidth, glConfig.vidHeight, buffer, 0);
-	SavePNG(fileName, buffer, glConfig.vidWidth, glConfig.vidHeight, 4);
-	ri.Hunk_FreeTempMemory( buffer );
-}
 
 
 /*
@@ -1173,8 +1142,6 @@ const void *RB_TakeScreenshotCmd( const void *data ) {
 
 	if (cmd->type == SCREENSHOT_JPEG) {
 		RB_TakeScreenshotJPEG( cmd->x, cmd->y, cmd->width, cmd->height, cmd->fileName);
-	} else if (cmd->type == SCREENSHOT_PNG) {
-		RB_TakeScreenshotPNG(cmd->x, cmd->y, cmd->width, cmd->height, cmd->fileName);
 	} else {  // SCREENSHOT_TGA
 		RB_TakeScreenshot( cmd->x, cmd->y, cmd->width, cmd->height, cmd->fileName);
 	}
@@ -2062,8 +2029,7 @@ void R_Register( void )
 	ri.Cmd_AddCommand( "shaderlist", R_ShaderList_f );
 	ri.Cmd_AddCommand( "skinlist", R_SkinList_f );
 	ri.Cmd_AddCommand( "modellist", R_Modellist_f );
-	ri.Cmd_AddCommand( "modelist", R_ModeList_f );
-	ri.Cmd_AddCommand( "fontlist", R_FontList_f);
+	ri.Cmd_AddCommand( "modelist", R_ModeList_f );	
 	ri.Cmd_AddCommand( "screenshot", R_ScreenShot_f );
 	ri.Cmd_AddCommand( "screenshotJPEG", R_ScreenShotJPEG_f );
 	ri.Cmd_AddCommand( "screenshotPNG", R_ScreenShotPNG_f );
@@ -2212,7 +2178,6 @@ void RE_Shutdown( qboolean destroyWindow ) {
 		R_DeleteTextures();
 	}
 
-	R_MME_Shutdown();
 	R_DoneFreeType();
 
 	// shut down platform specific OpenGL stuff
@@ -2308,23 +2273,20 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.DrawStretchRaw = RE_StretchRaw;
 	re.UploadCinematic = RE_UploadCinematic;
 
-	re.RegisterFont = RE_RegisterFont;
-	re.GetGlyphInfo = RE_GetGlyphInfo;
-	re.GetFontInfo = RE_GetFontInfo;
+	re.RegisterFont = RE_RegisterFont;	
+	re.GetGlyphInfo = RE_GetGlyphInfo;	
 	re.RemapShader = R_RemapShader;
 	re.ClearRemappedShader = R_ClearRemappedShader;
 	re.GetEntityToken = R_GetEntityToken;
 	re.inPVS = R_inPVS;
 
-	re.TakeVideoFrame = RE_TakeVideoFrame;
 	re.Get_Advertisements = RE_Get_Advertisements;
 	re.ReplaceShaderImage = RE_ReplaceShaderImage;
 	re.RegisterShaderFromData = RE_RegisterShaderFromData;
 	re.GetShaderImageDimensions = RE_GetShaderImageDimensions;
 	re.GetShaderImageData = RE_GetShaderImageData;
 	re.GetSingleShader = RE_GetSingleShader;
-	re.BeginHud = RE_BeginHud;
-	re.UpdateDof = RE_UpdateDof;
+	re.BeginHud = RE_BeginHud;	
 
 	return &re;
 }
