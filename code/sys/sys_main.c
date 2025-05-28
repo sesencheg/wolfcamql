@@ -847,7 +847,7 @@ int main( int argc, char **argv )
 			demoNameAsArg = qfalse;
 		}
 	}
-	Sys_PlatformInit(useBacktrace, useConsoleOutput);
+	Sys_PlatformInit();
 
 #ifdef __APPLE__
 	// This is passed if we are launched by double-clicking
