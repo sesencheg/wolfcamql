@@ -3454,6 +3454,9 @@ int Com_TimeVal(int minMsec)
 
 //extern qboolean CL_VideoRecording( void );
 
+#ifndef DEDICATED
+#include "../client/cl_avi.h"
+#endif
 
 /*
 =================
@@ -3526,6 +3529,12 @@ void Com_Frame( void ) {
 		minMsec = 1;
 	}
 
+#ifndef DEDICATED
+	if (CL_VideoRecording(&afdMain)) {
+		minMsec = 1;
+	}
+#endif
+
 	msec = minMsec;
 	do {
 		int timeRemaining = minMsec - msec;
@@ -3549,7 +3558,11 @@ void Com_Frame( void ) {
 		//if(timeRemaining == 0)
 		//	timeRemaining = 1;
 
+#ifndef DEDICATED
+		if (com_idleSleep->integer  &&  !CL_VideoRecording(&afdMain)) {
+#else
 		if (com_idleSleep->integer) {
+#endif
 			if (timeRemaining > 1) {
 				static int count = 0;
 

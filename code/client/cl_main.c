@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // cl_main.c  -- client main loop
 
 #include "client.h"
+#include "cl_avi.h"
 #include "keys.h"
 #include "snd_local.h"
 #include "../sys/sys_local.h"
@@ -86,7 +87,6 @@ cvar_t	*cl_timedemo;
 cvar_t	*cl_timedemoLog;
 cvar_t	*cl_autoRecordDemo;
 cvar_t	*cl_aviFrameRate;
-cvar_t	*cl_aviMotionJpeg;
 cvar_t *cl_aviFrameRateDivider;
 cvar_t	*cl_aviCodec;
 cvar_t *cl_aviAllowLargeFiles;
@@ -186,6 +186,14 @@ serverStatus_t cl_serverStatusList[MAX_SERVERSTATUSREQUESTS];
 
 double Overf = 0.0;
 
+aviFileData_t afdMain;
+aviFileData_t afdLeft;
+aviFileData_t afdRight;
+
+aviFileData_t afdDepth;
+aviFileData_t afdDepthLeft;
+aviFileData_t afdDepthRight;
+
 GLfloat *Video_DepthBuffer = NULL;
 byte *ExtraVideoBuffer = NULL;
 qboolean SplitVideo = qfalse;
@@ -209,6 +217,7 @@ static void CL_ServerStatusResponse( netadr_t from, msg_t *msg );
 static void CL_ReadExtraDemoMessage (demoFile_t *df);
 static void CL_CheckWorkshopDownload (void);
 
+void CL_StopVideo_f (void);
 static void stream_demo_look_ahead (void);
 static qboolean check_for_older_uncompressed_demo (void);
 
@@ -3417,6 +3426,9 @@ CL_ShutdownAll
 void CL_ShutdownAll(qboolean shutdownRef)
 {
 
+	if(CL_VideoRecording(&afdMain))
+		CL_StopVideo_f();
+
 	if(clc.demorecording)
 		CL_StopRecord_f();
 
@@ -3602,6 +3614,27 @@ void CL_Disconnect( qboolean showMainMenu ) {
 
 	if ( !com_cl_running || !com_cl_running->integer ) {
 		return;
+	}
+
+	// Stop recording any video
+	if (CL_VideoRecording(&afdMain)) {
+		// Finish rendering current frame
+		SCR_UpdateScreen( );
+		CL_CloseAVI(&afdMain, qfalse);
+		if (Video_DepthBuffer) {
+			CL_CloseAVI(&afdDepth, qfalse);
+			CL_CloseAVI(&afdDepthLeft, qfalse);
+			CL_CloseAVI(&afdDepthRight, qfalse);
+			free(Video_DepthBuffer);
+			Video_DepthBuffer = NULL;
+		}
+
+		if (SplitVideo) {
+			CL_CloseAVI(&afdLeft, qfalse);
+			CL_CloseAVI(&afdRight, qfalse);
+			free(ExtraVideoBuffer);
+			ExtraVideoBuffer = NULL;
+		}
 	}
 
 	Com_Printf("disconnect\n");
@@ -4198,6 +4231,23 @@ void CL_Vid_Restart_f (void)
 	state = clc.state;
 
 	// Settings may have changed so stop recording now
+	if(CL_VideoRecording(&afdMain)) {
+		CL_CloseAVI(&afdMain, qfalse);
+		if (Video_DepthBuffer) {
+			CL_CloseAVI(&afdDepth, qfalse);
+			CL_CloseAVI(&afdDepthLeft, qfalse);
+			CL_CloseAVI(&afdDepthRight, qfalse);
+			free(Video_DepthBuffer);
+			Video_DepthBuffer = NULL;
+		}
+
+		if (SplitVideo) {
+			CL_CloseAVI(&afdLeft, qfalse);
+			CL_CloseAVI(&afdRight, qfalse);
+			free(ExtraVideoBuffer);
+			ExtraVideoBuffer = NULL;
+		}
+	}
 
 	if(clc.demorecording)
 		CL_StopRecord_f();
@@ -5527,7 +5577,43 @@ void CL_Frame ( int msec, double fmsec ) {
 
 	//Com_Printf("video: %d\n", CL_VideoRecording(&afdMain));
 	// if recording an avi, lock to a fixed fps
-	if (1) {  //(com_timescale->value < 1.0) {
+	if ((CL_VideoRecording(&afdMain) && cl_aviFrameRate->integer && msec)  &&  !(cl_freezeDemoPauseVideoRecording->integer  &&  cl_freezeDemo->integer)) {
+		//Com_Printf("yes\n");
+		// save the current screen
+		if ( clc.state == CA_ACTIVE || cl_forceavidemo->integer) {
+			int blurFrames;
+			double frameRateDivider;
+
+			frameRateDivider = (double)cl_aviFrameRateDivider->integer;
+			if (frameRateDivider < 1.0) {
+				frameRateDivider = 1.0;
+			}
+
+			CL_TakeVideoFrame(&afdMain);
+
+			// fixed time for next frame'
+			blurFrames = Cvar_VariableIntegerValue("mme_blurFrames");
+			if (blurFrames > 1) {
+				blurFramesFactor = 1.0 / (double)blurFrames;
+			}
+			f = ( ((double)1000.0f / ((double)cl_aviFrameRate->value * frameRateDivider)) * (double)com_timescale->value ) * blurFramesFactor;
+			//msec = (int)ceil(f);
+			msec = (int)floor(f);
+			//overf += ceil(f) - f;
+			Overf += f - floor(f);
+			if (Overf > 1.0) {
+				//msec -= (int)floor(overf);
+				//overf -= floor(overf);
+				msec += (int)floor(Overf);
+				Overf -= floor(Overf);
+			}
+			if (msec == 0) {
+				//Com_Printf("msec too small\n");
+				//msec = 1;
+			}
+			//Com_Printf("video msec: %lf %d  overf: %f\n", f, msec, overf);
+		}
+	} else if (1) {  //(com_timescale->value < 1.0) {
 		//FIXME clampTime changes to msec
 		// msec will always be 1
 		if (!cl_freezeDemo->integer) {
@@ -5885,6 +5971,8 @@ void CL_InitRef ( void ) {
 	ri.CIN_PlayCinematic = CIN_PlayCinematic;
 	ri.CIN_RunCinematic = CIN_RunCinematic;
 
+	ri.CL_WriteAVIVideoFrame = CL_WriteAVIVideoFrame;
+
 	ri.IN_Init = IN_Init;
 	ri.IN_Shutdown = IN_Shutdown;
 	ri.IN_Restart = IN_Restart;
@@ -5898,6 +5986,14 @@ void CL_InitRef ( void ) {
 
 	// video recording stuff
 	ri.SplitVideo = &SplitVideo;
+
+	ri.afdMain = &afdMain;
+	ri.afdLeft = &afdLeft;
+	ri.afdRight = &afdRight;
+
+	ri.afdDepth = &afdDepth;
+	ri.afdDepthLeft = &afdDepthLeft;
+	ri.afdDepthRight = &afdDepthRight;
 
 	ri.Video_DepthBuffer = &Video_DepthBuffer;
 	ri.ExtraVideoBuffer = &ExtraVideoBuffer;
@@ -5960,6 +6056,154 @@ void CL_SetHeadModel_f( void ) {
 
 
 extern int s_soundtime;
+
+/*
+===============
+CL_Video_f
+
+video
+video [filename]
+===============
+*/
+void CL_Video_f( void )
+{
+  char  filename[ MAX_OSPATH ];
+  int   i;  //, last;
+  qboolean avi;
+  qboolean wav;
+  qboolean tga;
+  qboolean jpg;
+  qboolean png;
+  qboolean noSoundAvi;
+
+  if (!clc.demoplaying) {  //  ||  clc.state == CA_CONNECTING) {
+	  Com_Printf( "^1The video command can only be used when playing back demos\n" );
+	  return;
+  }
+
+  avi = qfalse;
+  wav = qfalse;
+  tga = qfalse;
+  jpg = qfalse;
+  png = qfalse;
+  noSoundAvi = qfalse;
+  filename[0] = '\0';
+  SplitVideo = qfalse;
+
+  for (i = 1;  i < Cmd_Argc();  i++) {
+	  if (!Q_stricmp(Cmd_Argv(i), "avi")) {
+		  avi = qtrue;
+	  } else if (!Q_stricmp(Cmd_Argv(i), "avins")) {
+		  noSoundAvi = qtrue;
+	  } else if (!Q_stricmp(Cmd_Argv(i), "wav")) {
+		  wav = qtrue;
+	  } else if (!Q_stricmp(Cmd_Argv(i), "tga")) {
+		  tga = qtrue;
+	  } else if (!Q_stricmp(Cmd_Argv(i), "jpg")) {
+		  jpg = qtrue;
+	  } else if (!Q_stricmp(Cmd_Argv(i), "jpeg")) {
+		  jpg = qtrue;
+	  } else if (!Q_stricmp(Cmd_Argv(i), "png")) {
+		  png = qtrue;
+	  } else if (!Q_stricmp(Cmd_Argv(i), "split")) {
+		  SplitVideo = qtrue;
+	  } else if (!Q_stricmp(Cmd_Argv(i), "name")) {
+		  if (!Q_stricmp(Cmd_Argv(i + 1), ":demoname")) {
+			  char dnameBuffer[MAX_OSPATH];
+
+			  COM_StripExtension(Cvar_VariableString("cl_demoFileBaseName"), dnameBuffer, MAX_OSPATH);
+			  Q_strncpyz(filename, dnameBuffer, MAX_OSPATH);
+		  } else {
+			  Q_strncpyz(filename, Cmd_Argv(i + 1), MAX_OSPATH);
+		  }
+		  i++;
+	  }
+  }
+
+  if (!avi  &&  !tga  &&  !jpg  &&  !png) {
+	  avi = qtrue;
+  }
+
+  if (avi  &&  (tga | jpg | png)) {
+	  Com_Printf("^1can't record video and screenshots at the same time\n");
+	  return;
+  }
+
+#if 0
+  if (Cmd_Argc() < 2) {
+	  avi = qtrue;
+  }
+#endif
+
+  if (avi  ||  wav) {
+	  if (!Q_stricmp(s_backend->string, "OpenAL")) {
+		  Com_Printf("^1can't record sound using OpenAL\n");
+		  return;
+	  }
+	  if (dma.samplebits != 16) {
+		  Com_Printf("^1can't record sound if audio sample bits not equal to 16 (see s_sdlBits)\n");
+		  return;
+	  }
+	  if (dma.channels != 2) {
+		  Com_Printf("^1can't record sound if audio channels not equal to 2 (see s_sdlChannels)\n");
+		  return;
+	  }
+  }
+
+  if (Cvar_VariableIntegerValue("mme_saveDepth")) {
+	  Video_DepthBuffer = malloc(cls.glconfig.vidWidth * cls.glconfig.vidHeight * sizeof(GLfloat) + 18);
+	  if (!Video_DepthBuffer) {
+		  Com_Error(ERR_DROP, "Couldn't allocate memory for depth buffer");
+	  }
+
+	  if (SplitVideo  &&  Cvar_VariableIntegerValue("r_anaglyphMode") == 19) {
+		  CL_OpenAVIForWriting(&afdDepthLeft, filename, qfalse, avi, avi ? qtrue : noSoundAvi, wav, tga, jpg, png, qtrue, qtrue, qtrue);
+		  CL_OpenAVIForWriting(&afdDepthRight, filename, qfalse, avi, avi ? qtrue : noSoundAvi, wav, tga, jpg, png, qtrue, qtrue, qfalse);
+	  } else {
+		  CL_OpenAVIForWriting(&afdDepth, filename, qfalse, avi, avi ? qtrue : noSoundAvi, wav, tga, jpg, png, qtrue, qfalse, qfalse);
+	  }
+  }
+
+  if (SplitVideo) {
+	  ExtraVideoBuffer = malloc(18 + cls.glconfig.vidWidth * cls.glconfig.vidHeight * 4);
+	  if (!ExtraVideoBuffer) {
+		  Com_Error(ERR_DROP, "Couldn't allocate memory for extra video buffer");
+	  }
+	  CL_OpenAVIForWriting(&afdLeft, filename, qfalse, avi, avi ? qtrue : noSoundAvi, wav, tga, jpg, png, qfalse, qtrue, qtrue);
+	  CL_OpenAVIForWriting(&afdRight, filename, qfalse, avi, avi ? qtrue : noSoundAvi, wav, tga, jpg, png, qfalse, qtrue, qfalse);
+  }
+  //Com_Printf("^2video cl_aviFrameRate %d\n", cl_aviFrameRate->integer);
+  CL_OpenAVIForWriting(&afdMain, filename, qfalse, avi, noSoundAvi, wav, tga, jpg, png, qfalse, qfalse, qfalse);
+
+  if (CL_VideoRecording(&afdMain)) {
+	  s_soundtime = s_paintedtime;
+  }
+}
+
+/*
+===============
+CL_StopVideo_f
+===============
+*/
+void CL_StopVideo_f( void )
+{
+	if (Video_DepthBuffer) {
+		CL_CloseAVI(&afdDepth, qfalse);
+		CL_CloseAVI(&afdDepthLeft, qfalse);
+		CL_CloseAVI(&afdDepthRight, qfalse);
+		free(Video_DepthBuffer);
+		Video_DepthBuffer = NULL;
+	}
+
+	if (SplitVideo) {
+		CL_CloseAVI(&afdLeft, qfalse);
+		CL_CloseAVI(&afdRight, qfalse);
+		free(ExtraVideoBuffer);
+		ExtraVideoBuffer = NULL;
+	}
+
+	CL_CloseAVI(&afdMain, qfalse);
+}
 
 static void fast_forward_demo (double wantedTime)
 {
@@ -6663,7 +6907,6 @@ void CL_Init ( void ) {
 	cl_timedemoLog = Cvar_Get ("cl_timedemoLog", "", CVAR_ARCHIVE);
 	cl_autoRecordDemo = Cvar_Get ("cl_autoRecordDemo", "0", CVAR_ARCHIVE);
 	cl_aviFrameRate = Cvar_Get ("cl_aviFrameRate", "50", CVAR_ARCHIVE);
-	cl_aviMotionJpeg = Cvar_Get ("cl_aviMotionJpeg", "1", CVAR_ARCHIVE);
 	cl_aviFrameRateDivider = Cvar_Get("cl_aviFrameRateDivider", "1", CVAR_ARCHIVE);
 	cl_aviCodec = Cvar_Get ("cl_aviCodec", "uncompressed", CVAR_ARCHIVE);
 	cl_aviAllowLargeFiles = Cvar_Get("cl_aviAllowLargeFiles", "1", CVAR_ARCHIVE);
@@ -6859,7 +7102,9 @@ void CL_Init ( void ) {
 	Cmd_AddCommand ("fs_openedList", CL_OpenedPK3List_f );
 	Cmd_AddCommand ("fs_referencedList", CL_ReferencedPK3List_f );
 	//Cmd_AddCommand ("model", CL_SetModel_f );
-	//Cmd_AddCommand ("headmodel", CL_SetHeadModel_f );		
+	//Cmd_AddCommand ("headmodel", CL_SetHeadModel_f );
+	Cmd_AddCommand ("video", CL_Video_f );
+	Cmd_AddCommand ("stopvideo", CL_StopVideo_f );
 
 	if( !com_dedicated->integer ) {
 		Cmd_AddCommand ("sayto", CL_Sayto_f );

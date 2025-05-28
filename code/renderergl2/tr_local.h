@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../renderercommon/iqm.h"
 #include "../renderercommon/qgl.h"
 
-//#include "../renderercommon/tr_mme.h"
+#include "../renderercommon/tr_mme.h"
 
 #define GLE(ret, name, ...) extern name##proc * qgl##name;
 QGL_1_1_PROCS;
@@ -2158,7 +2158,7 @@ skin_t	*R_GetSkinByHandle( qhandle_t hSkin );
 
 int R_ComputeLOD( trRefEntity_t *ent );
 
-const void *RB_TakeVideoFrameCmd (const void *data);
+const void *RB_TakeVideoFrameCmd (const void *data, shotData_t *shotData);
 
 //
 // tr_shader.c
@@ -2175,6 +2175,7 @@ void    R_RemapShader(const char *oldShader, const char *newShader, const char *
 void R_ClearRemappedShader (const char *shaderName);
 void R_ClearAllRemappedShaders_f (void);
 qhandle_t RE_GetSingleShader (void);
+void R_FontList_f (void);
 
 
 /*
@@ -2699,8 +2700,12 @@ void RE_SaveJPG(char * filename, int quality, int image_width, int image_height,
 size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality,
 		          int image_width, int image_height, byte *image_buffer, int padding);
 
+qboolean SavePNG (const char *name, byte *data, int width, int height, int bytedepth);
+
 //void RE_TakeVideoFrame( int width, int height,
 //		byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg );
+
+void RE_TakeVideoFrame (aviFileData_t *afd, int width, int height, byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg, qboolean avi, qboolean tga, qboolean jpg, qboolean png, int picCount, char *givenFileName);
 
 void R_ConvertTextureFormat( const byte *in, int width, int height, GLenum format, GLenum type, byte *out );
 
@@ -2715,7 +2720,7 @@ image_t *R_CreateImage2( const char *name, byte *pic, int width, int height, GLe
 
 void RE_SetPathLines (int *numCameraPoints, cameraPoint_t *cameraPoints, int *numSplinePoints, vec3_t *splinePoints, const vec4_t color);
 void R_CreatePlayerColorSkinImages (qboolean force);
-
+void R_MME_Init (void);
 void RE_Get_Advertisements(int *num, float *verts, char shaders[][MAX_QPATH]);
 void RE_BeginHud (void);
 

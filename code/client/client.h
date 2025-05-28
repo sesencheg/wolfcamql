@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "snd_public.h"
 #include "../cgame/cg_public.h"
 #include "../game/bg_public.h"
+#include "cl_avi.h"
 #include "../sys/sys_local.h"
 
 #ifdef USE_CURL
@@ -565,7 +566,6 @@ extern  cvar_t  *j_up_axis;
 
 extern	cvar_t	*cl_timedemo;
 extern	cvar_t	*cl_aviFrameRate;
-extern	cvar_t	*cl_aviMotionJpeg;
 extern cvar_t *cl_aviFrameRateDivider;
 extern	cvar_t	*cl_aviCodec;
 extern cvar_t *cl_aviAllowLargeFiles;
@@ -807,6 +807,16 @@ void LAN_SaveServersToCache( void );
 //
 void CL_Netchan_Transmit( netchan_t *chan, msg_t* msg);	//int length, const byte *data );
 qboolean CL_Netchan_Process( netchan_t *chan, msg_t *msg );
+
+//
+// cl_avi.c
+//
+qboolean CL_OpenAVIForWriting (aviFileData_t *afd, const char *filename, qboolean us, qboolean avi, qboolean noSoundAvi, qboolean wav, qboolean tga, qboolean jpg, qboolean png, qboolean depth, qboolean split, qboolean left);
+void CL_TakeVideoFrame (aviFileData_t *afd);
+void CL_WriteAVIVideoFrame (aviFileData_t *afd, const byte *imageBuffer, int size);
+void CL_WriteAVIAudioFrame (aviFileData_t *afd, const byte *pcmBuffer, int size);
+qboolean CL_CloseAVI (aviFileData_t *afd, qboolean us);
+//qboolean CL_VideoRecording (aviFileData_t *afd);
 
 //
 // cl_main.c

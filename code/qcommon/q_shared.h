@@ -1531,7 +1531,6 @@ typedef struct {
 	char registerName[MAX_QPATH];  // name passed in when font is first registered, above 'name' is an internal name used for matching
 	void *fontFace;
 	void *faceData;
-  glyphInfo_t glyphs [GLYPHS_PER_FONT];
 } fontInfo_t;
 
 #define Square(x) ((x)*(x))

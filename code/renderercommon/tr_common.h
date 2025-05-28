@@ -149,6 +149,7 @@ qboolean RE_GetGlyphInfo (fontInfo_t *fontInfo, int charValue, glyphInfo_t *glyp
 qboolean RE_GetFontInfo (int fontId, fontInfo_t *font);
 
 void R_LoadAdvertisements( lump_t *l );
+void RE_UpdateDof (float viewFocus, float viewRadius);
 
 /*
 =============================================================

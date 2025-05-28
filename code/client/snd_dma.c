@@ -1422,9 +1422,46 @@ static void S_GetSoundtime(void)
 	int blurFrames;
 	double msec;
 
+	//if (CL_VideoRecording(&afdMain)  &&  !(cl_freezeDemoPauseVideoRecording->integer  &&  cl_freezeDemo->integer))
+	if (CL_VideoRecording(&afdMain))
+	{
+		double frameRateDivider;
 
-	overf = 0.0;
-
+		frameRateDivider = (double)cl_aviFrameRateDivider->integer;
+		if (frameRateDivider < 1.0) {
+			frameRateDivider = 1.0;
+		}
+		//FIXME why no msec check like video?
+		blurFrames = Cvar_VariableIntegerValue("mme_blurFrames");
+		if (blurFrames == 0  ||  blurFrames == 1) {
+			//msec = (int)ceil( (1000.0f / cl_aviFrameRate->value) * com_timescale->value );
+			//s_soundtime += (int)ceil( dma.speed / cl_aviFrameRate->value );
+			//msec = (int)ceil( dma.speed / cl_aviFrameRate->value );
+			//msec = ceil( (float)dma.speed / (float)cl_aviFrameRate->value );
+			msec = ( (double)dma.speed / ((double)cl_aviFrameRate->value * frameRateDivider) );
+		} else {
+			//msec = (int)ceil((1000.0f / (cl_aviFrameRate->value * (float)blurFrames)) * com_timescale->value);
+			//s_soundtime += (int)ceil( dma.speed / (cl_aviFrameRate->value * (float)blurFrames));
+			//msec = (int)ceil( dma.speed / (cl_aviFrameRate->value * (float)blurFrames));
+			//msec = ceil( (float)dma.speed / ((float)cl_aviFrameRate->value * (float)blurFrames));
+			msec = ( (double)dma.speed / ((double)cl_aviFrameRate->value * (double)blurFrames * frameRateDivider));
+		}
+		//overf += ceil(msec) - msec;
+		overf += msec - floor(msec);
+		//s_soundtime += (int)ceil(msec);
+		s_soundtime += (int)floor(msec);
+		if (overf > 1.0) {
+			//s_soundtime -= (int)floor(overf);
+			s_soundtime += (int)floor(overf);
+			overf -= floor(overf);
+		}
+		//Com_Printf("sound msec: %lf %d  overf: %f\n", msec, (int)ceil(msec), overf);
+		return;
+	} else {
+		if (!CL_VideoRecording(&afdMain)) {
+			overf = 0.0;
+		}
+	}
 
 	// it is possible to miscount buffers if it has wrapped twice between
 	// calls to S_Update.  Oh well.

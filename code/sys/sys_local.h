@@ -59,7 +59,7 @@ char *Sys_StripAppBundle( char *pwd );
 
 void Sys_GLimpSafeInit( void );
 void Sys_GLimpInit( void );
-void Sys_PlatformInit ( void );
+void Sys_PlatformInit (qboolean useBacktrace, qboolean useConsoleOutput);
 void Sys_PlatformExit( void );
 void Sys_SigHandler( int signal ) __attribute__ ((noreturn));
 void Sys_ErrorDialog( const char *error );
@@ -72,6 +72,7 @@ qboolean Sys_PIDIsRunning( int pid );
 char *Sys_ParseProtocolUri( const char *uri );
 #endif
 
+void Sys_Backtrace_f (void);
 qboolean Sys_FileIsDirectory (const char *path);
 qboolean Sys_FileExists (const char *path);
 qboolean Sys_CopyFile (const char *src, const char *dest);

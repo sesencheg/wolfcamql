@@ -4818,7 +4818,7 @@ void CG_Text_Paint_Limit (float *maxX, float x, float y, float scale, const vec4
 			bytes = 0;
 			cp = Q_GetCpFromUtf8(s, &bytes, &error);
 
-			//trap_R_GetGlyphInfo(font, cp, &glyph);
+			trap_R_GetGlyphInfo(font, cp, &glyph);
 
 			if ( Q_IsColorString( s ) ) {
 				if (cgs.cpma) {

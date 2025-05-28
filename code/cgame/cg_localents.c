@@ -1851,7 +1851,7 @@ static void CG_AddDamagePlum (localEntity_t *le)
 
 		re->renderfx = RF_DEPTHHACK;
 		//glyph = &font->glyphs[48 + digits[i]];
-//		trap_R_GetGlyphInfo(font, 48 + digits[i], &glyph);
+		trap_R_GetGlyphInfo(font, 48 + digits[i], &glyph);
 		yadj = useScale * yscale * glyph.top;
 		//FIXME
 		//xadj = useScale * xscale * glyph.left;

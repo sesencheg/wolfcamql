@@ -162,7 +162,7 @@ static void SCR_DrawChar (int x, int y, float size, int ch)
 void SCR_DrawSmallChar( int x, int y, int ch ) {
 	glyphInfo_t glyph;
 
-	
+	re.GetGlyphInfo(&cls.consoleFont, ch, &glyph);
 
 	if ( y < -SMALLCHAR_HEIGHT ) {
 		return;
@@ -178,7 +178,7 @@ void SCR_DrawSmallCharExt( float x, float y, float width, float height, int ch )
 	glyphInfo_t glyph;
 	float scale;
 
-	
+	re.GetGlyphInfo(&cls.consoleFont, ch, &glyph);
 
 	if ( y < -height ) {
 		return;
@@ -496,7 +496,7 @@ This will be called twice if rendering in stereo mode
 void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 	qboolean uiFullscreen;
 
-	re.BeginFrame(stereoFrame, qfalse);
+	re.BeginFrame(stereoFrame, CL_VideoRecording(&afdMain));
 
 	uiFullscreen = (uivm && VM_Call( uivm, UI_IS_FULLSCREEN ));
 

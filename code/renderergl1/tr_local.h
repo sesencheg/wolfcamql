@@ -32,7 +32,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "../renderercommon/tr_public.h"
 #include "../cgame/cg_camera.h"
-//#include "../renderercommon/tr_mme.h"
+#include "../client/cl_avi.h"
+#include "../renderercommon/tr_mme.h"
 
 #include "../renderercommon/qgl.h"
 #include "../renderercommon/iqm.h"
@@ -1463,7 +1464,7 @@ skin_t	*R_GetSkinByHandle( qhandle_t hSkin );
 
 int R_ComputeLOD( trRefEntity_t *ent );
 
-const void *RB_TakeVideoFrameCmd (const void *data);
+const void *RB_TakeVideoFrameCmd (const void *data, shotData_t *shotData);
 
 //
 // tr_shader.c
@@ -1948,6 +1949,8 @@ void RE_SaveJPG(char * filename, int quality, int image_width, int image_height,
 				unsigned char *image_buffer, int padding);
 size_t RE_SaveJPGToBuffer(byte *buffer, size_t bufSize, int quality,
 		int image_width, int image_height, byte *image_buffer, int padding);
+qboolean SavePNG (const char *name, byte *data, int width, int height, int bytedepth);
+void RE_TakeVideoFrame (aviFileData_t *afd, int width, int height, byte *captureBuffer, byte *encodeBuffer, qboolean motionJpeg, qboolean avi, qboolean tga, qboolean jpg, qboolean png, int picCount, char *givenFileName);
 
 void RE_Get_Advertisements(int *num, float *verts, char shaders[][MAX_QPATH]);
 void RE_BeginHud (void);
@@ -1965,6 +1968,7 @@ void R_Upload32( unsigned *data,
 						  int *format,
 			   int *pUploadWidth, int *pUploadHeight );
 void R_CreatePlayerColorSkinImages (qboolean force);
+void R_MME_Init (void);
 void R_TakeScreenshot( int x, int y, int width, int height, char *name, int type );
 mnode_t *R_PointInLeaf (const vec3_t p);
 void R_CreateSingleShader (void);

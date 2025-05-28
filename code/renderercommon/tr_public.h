@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "tr_types.h"
 #include "../cgame/cg_camera.h"
+#include "../client/cl_avi.h"
 
 #ifdef USE_LOCAL_HEADERS
   #include "SDL_opengl.h"
@@ -112,6 +113,8 @@ typedef struct {
 	qboolean (*GetEntityToken)( char *buffer, int size );
 	qboolean (*inPVS)( const vec3_t p1, const vec3_t p2 );
 
+	void (*TakeVideoFrame)(aviFileData_t *afd, int h, int w, byte* captureBuffer, byte *encodeBuffer, qboolean motionJpeg, qboolean avi, qboolean tga, qboolean jpg, qboolean png, int picCount, char *givenFileName);
+
 	void (*BeginHud)(void);
 	void (*UpdateDof)(float viewFocus, float viewRadius);
 
@@ -196,7 +199,7 @@ typedef struct {
 	int		(*CIN_PlayCinematic)( const char *arg0, int xpos, int ypos, int width, int height, int bits);
 	e_status (*CIN_RunCinematic) (int handle);
 
-	void	(*CL_WriteAVIVideoFrame)( const byte *buffer, int size );
+	void	(*CL_WriteAVIVideoFrame)(aviFileData_t *afd, const byte *buffer, int size);
 
 	// input event handling
 	void	(*IN_Init)( void *windowData );
@@ -214,6 +217,14 @@ typedef struct {
 
 	// video recording stuff
 	qboolean *SplitVideo;
+
+	aviFileData_t *afdMain;
+	aviFileData_t *afdLeft;
+	aviFileData_t *afdRight;
+
+	aviFileData_t *afdDepth;
+	aviFileData_t *afdDepthLeft;
+	aviFileData_t *afdDepthRight;
 
 	GLfloat **Video_DepthBuffer;
 	byte **ExtraVideoBuffer;

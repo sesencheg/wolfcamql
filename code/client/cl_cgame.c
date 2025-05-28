@@ -1127,9 +1127,9 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 		re.RegisterFont( VMA(1), args[2], VMA(3));
 		return 0;
 	case CG_R_GETGLYPHINFO:
-		return re.GetGlyphInfo(VMA(1), args[2], VMA(3));		
+		return re.GetGlyphInfo(VMA(1), args[2], VMA(3));
 	case CG_R_GETFONTINFO:
-		return re.GetFontInfo(args[1], VMA(2));		
+		return re.GetFontInfo(args[1], VMA(2));
 	case CG_R_CLEARSCENE:
 		re.ClearScene();
 		return 0;
@@ -1315,6 +1315,10 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 
 	case CG_R_BEGIN_HUD:
 		re.BeginHud();
+		return 0;
+
+	case CG_R_UPDATE_DOF:
+		re.UpdateDof(VMF(1), VMF(2));
 		return 0;
 
 	case CG_DRAW_CONSOLE_LINES:
@@ -1651,7 +1655,7 @@ void CL_CGameRendering( stereoFrame_t stereo ) {
 	int startTime;
 
 	startTime = Sys_Milliseconds();
-	VM_Call(cgvm, CG_DRAW_ACTIVE_FRAME, cl.serverTime, stereo, clc.demoplaying, di.streaming, di.waitingForStream, (int)(Overf * SUBTIME_RESOLUTION), qtrue);
+	VM_Call(cgvm, CG_DRAW_ACTIVE_FRAME, cl.serverTime, stereo, clc.demoplaying, di.streaming, di.waitingForStream, CL_VideoRecording(&afdMain), (int)(Overf * SUBTIME_RESOLUTION), qtrue);
 	clc.cgameTime += (Sys_Milliseconds() - startTime);
 	VM_Debug( 0 );
 	//cl.draw = qtrue;
