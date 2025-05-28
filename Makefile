@@ -1168,7 +1168,7 @@ ifeq ($(PLATFORM),emscripten)
 
     # add extra freetype directories since they changed header locations
     FREETYPE_CFLAGS += -I/usr/include/freetype2 -I/usr/include/freetype2/freetype
-    #FREETYPE_LIBS = -lfreetype
+    FREETYPE_LIBS = -lfreetype
   endif
 
   ifneq ($(findstring /emcc,$(CC)),/emcc)
@@ -1476,7 +1476,7 @@ endif
 
 ifeq ($(USE_FREETYPE),1)
   FREETYPE_CFLAGS ?= $(shell $(PKG_CONFIG) --silence-errors --cflags freetype2 || true)
-  #FREETYPE_LIBS ?= $(shell $(PKG_CONFIG) --silence-errors --libs freetype2 || echo -lfreetype)
+  FREETYPE_LIBS ?= $(shell $(PKG_CONFIG) --silence-errors --libs freetype2 || echo -lfreetype)
 
   BASE_CFLAGS += -DBUILD_FREETYPE $(FREETYPE_CFLAGS)
   RENDERER_LIBS += $(FREETYPE_LIBS)
@@ -2033,6 +2033,7 @@ $(B)/$(AUTOUPDATER_BIN): $(Q3AUTOUPDATEROBJ)
 #############################################################################
 
 Q3OBJ = \
+  $(B)/client/cl_avi.o \
   $(B)/client/cl_camera.o \
   $(B)/client/cl_cgame.o \
   $(B)/client/cl_cin.o \
@@ -2175,6 +2176,9 @@ Q3R2OBJ = \
   $(B)/renderergl2/tr_main.o \
   $(B)/renderergl2/tr_marks.o \
   $(B)/renderergl2/tr_mesh.o \
+  $(B)/renderergl2/tr_mme.o \
+  $(B)/renderergl2/tr_mme_common.o \
+  $(B)/renderergl2/tr_mme_sse2.o \
   $(B)/renderergl2/tr_model.o \
   $(B)/renderergl2/tr_model_iqm.o \
   $(B)/renderergl2/tr_noise.o \
@@ -2246,6 +2250,9 @@ Q3ROBJ = \
   $(B)/renderergl1/tr_main.o \
   $(B)/renderergl1/tr_marks.o \
   $(B)/renderergl1/tr_mesh.o \
+  $(B)/renderergl1/tr_mme.o \
+  $(B)/renderergl1/tr_mme_common.o \
+  $(B)/renderergl1/tr_mme_sse2.o \
   $(B)/renderergl1/tr_model.o \
   $(B)/renderergl1/tr_model_iqm.o \
   $(B)/renderergl1/tr_noise.o \
@@ -2323,6 +2330,30 @@ ifneq ($(USE_INTERNAL_JPEG),0)
     $(B)/renderergl1/jquant1.o \
     $(B)/renderergl1/jquant2.o \
     $(B)/renderergl1/jutils.o
+endif
+
+ifneq ($(USE_INTERNAL_ZLIB),0)
+  Q3ROBJ += \
+    $(B)/renderergl1/adler32.o \
+    $(B)/renderergl1/crc32.o \
+    $(B)/renderergl1/deflate.o \
+    $(B)/renderergl1/infback.o \
+    $(B)/renderergl1/inffast.o \
+    $(B)/renderergl1/inflate.o \
+    $(B)/renderergl1/inftrees.o \
+    $(B)/renderergl1/trees.o \
+    $(B)/renderergl1/zutil.o
+
+  Q3R2OBJ += \
+    $(B)/renderergl2/adler32.o \
+    $(B)/renderergl2/crc32.o \
+    $(B)/renderergl2/deflate.o \
+    $(B)/renderergl2/infback.o \
+    $(B)/renderergl2/inffast.o \
+    $(B)/renderergl2/inflate.o \
+    $(B)/renderergl2/inftrees.o \
+    $(B)/renderergl2/trees.o \
+    $(B)/renderergl2/zutil.o
 endif
 
 ifeq ($(ARCH),x86)
