@@ -1167,7 +1167,7 @@ ifeq ($(PLATFORM),emscripten)
     #FIXME linux version is always using system libfreetype
 
     # add extra freetype directories since they changed header locations
-    FREETYPE_CFLAGS += -I/usr/include/freetype2 -I/usr/include/freetype2/freetype
+    FREETYPE_CFLAGS += -I/home/sesen/qljs/fttest/freetype-2.12.1/include/ -L/home/sesen/qljs/fttest/freetype-2.12.1/include/
     FREETYPE_LIBS = -lfreetype
   endif
 
