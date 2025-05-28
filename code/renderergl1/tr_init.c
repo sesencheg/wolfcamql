@@ -22,7 +22,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // tr_init.c -- functions that are not called every frame
 
 #include "tr_local.h"
-#include "../renderercommon/tr_mme.h"
 #include "../client/cl_avi.h"
 
 glconfig_t  glConfig;
