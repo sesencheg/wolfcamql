@@ -3387,17 +3387,6 @@ void RB_ExecuteRenderCommands( const void *data ) {
 					RB_EndSurface();
 				}
 
-				if (!shotDataLeft.workAlloc) {
-					ri.Error(ERR_DROP, "shotDataLeft memory not allocated");
-				}
-
-				if (tr.drawSurfsCount) {
-					if (R_MME_MultiPassNext(qfalse)) {
-						R_InitNextFrameNoCommands();
-						goto videoCommandCheckDone;
-					}
-				}
-
 				// draw hud
 				renderingHud2 = qfalse;
 
