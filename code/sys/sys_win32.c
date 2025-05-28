@@ -1052,62 +1052,11 @@ Sys_PlatformInit
 Windows specific initialisation
 ==============
 */
-void Sys_PlatformInit (qboolean useBacktrace, qboolean useConsoleOutput)
+void Sys_PlatformInit( void )
 {
-	HMODULE bt;
-	OSVERSIONINFO vi;
-	const char *osname;
-	int ret;
-	const char *arch;  // = "x86";
 #ifndef DEDICATED
 	TIMECAPS ptc;
 #endif
-	const char *envVal;
-
-	// sdl redirects output, steal it back
-	if (useConsoleOutput) {
-		BOOL b = AttachConsole(ATTACH_PARENT_PROCESS);
-		if (b) {
-			freopen("conin$", "r", stdin);
-			freopen("conout$", "w", stdout);
-			freopen("conout$", "w", stderr);
-
-			HStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-			if (HStdout != INVALID_HANDLE_VALUE) {
-
-				if (GetConsoleScreenBufferInfo(HStdout, &ScreenBufferInfo) != 0) {
-					SetConsoleTextAttribute(HStdout, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-					fputs("\r\n", stderr);
-					Com_Printf("win32:  using console output\n");
-					GotHandle = qtrue;
-				} else {
-					Com_Printf("win32:  couldn't get screen buffer information for console output, error %ld\n", GetLastError());
-					HStdout = INVALID_HANDLE_VALUE;
-					GotHandle = qfalse;
-				}
-			} else {
-				Com_Printf("win32:  couldn't get output handle for console output, error %ld\n", GetLastError());
-				GotHandle = qfalse;
-			}
-		} else {
-			Com_Printf("win32:  couldn't get parent console for console output, error %ld\n", GetLastError());
-		}
-	}
-
-	if (useBacktrace) {
-		DWORD lastError;
-
-#if defined(__x86_64__)
-		bt = LoadLibraryA("backtrace64.dll");
-#else
-		bt = LoadLibraryA("backtrace.dll");
-#endif
-		if (bt == NULL) {
-			lastError = GetLastError();
-			Com_Printf("ERROR loading backtrace library, error code: %ld\n", lastError);
-		}
-		Com_Printf("backtrace: %p\n", bt);
-	}
 
 	Sys_SetFloatEnv();
 
@@ -1119,220 +1068,14 @@ void Sys_PlatformInit (qboolean useBacktrace, qboolean useConsoleOutput)
 		if(timerResolution > 1)
 		{
 			Com_Printf("Warning: Minimum supported timer resolution is %ums "
-					   "on this system, recommended resolution 1ms\n", timerResolution);
+				"on this system, recommended resolution 1ms\n", timerResolution);
 		}
-
-		timeBeginPeriod(timerResolution);
+		
+		timeBeginPeriod(timerResolution);				
 	}
 	else
 		timerResolution = 0;
 #endif
-
-	envVal = getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
-	if (envVal == NULL  ||  strlen(envVal) == 0  ||  envVal[0] == '0') {  //atoi(envVal) == 0) {
-		DisableScreenBlanking = qtrue;
-	} else {
-		DisableScreenBlanking = qfalse;
-	}
-
-	memset(&vi, 0, sizeof(vi));
-	vi.dwOSVersionInfoSize = sizeof(vi);
-	ret = GetVersionEx(&vi);
-	if (!ret) {
-		Com_Printf("^1couldn't get Windows OS version info, error code: %lu\n", GetLastError());
-		return;
-	}
-
-	switch (vi.dwPlatformId) {
-	case 0:
-		osname = "Windows 3.1";
-		arch = "x86";
-		break;
-	case 1:
-		switch (vi.dwMinorVersion) {
-		case 0:
-			if (vi.szCSDVersion[1] == 'C'  ||  vi.szCSDVersion[1] == 'B') {
-				osname = "Windows 95 (Release 2)";
-			} else {
-				osname = "Windows 95";
-			}
-			break;
-		case 10:
-			if (vi.szCSDVersion[1] == 'A') {
-				osname = "Windows 98 SE";
-			} else {
-				osname = "Windows 98";
-			}
-			break;
-		case 90:
-			osname = "Windows Millennium";
-			break;
-		default:
-			osname = "Windows (unknown non nt)";
-			break;
-		}
-		arch = "x86";
-		break;
-	case 2: {
-		OSVERSIONINFOEX viex;
-		SYSTEM_INFO si;
-		qboolean ntWorkStation;
-
-		//FIXME GetVersionEx() is deprecated since Windows 8 and will show as Windows 8 even for Windows 10 if there isn't a manifest showing win10 support
-		// 2024-05-19  Java checks like this:
-		//    https://github.com/openjdk/jdk/blob/master/src/hotspot/os/windows/os_windows.cpp
-		//
-		//    Get the full path to \Windows\System32\kernel32.dll and use that for
-		//    determining what version of Windows we're running on.
-
-		memset(&viex, 0, sizeof(viex));
-		memset(&si, 0, sizeof(si));
-
-		viex.dwOSVersionInfoSize = sizeof(viex);
-		ret = GetVersionEx((OSVERSIONINFO *)&viex);
-		if (!ret) {
-			Com_Printf("^1couldn't get extendend Windows OS information, error code: %lu\n", GetLastError());
-			osname = "Windows (unknown version after 98)";
-			arch = "???";
-			break;
-		}
-
-		// sanity check
-		if (vi.dwMajorVersion != viex.dwMajorVersion  ||  vi.dwMinorVersion != viex.dwMinorVersion  ||  vi.dwPlatformId != viex.dwPlatformId) {
-			Com_Printf("^1version info mismatch: major %lu %lu, minor %lu %lu, platform %lu %lu\n", vi.dwMajorVersion, viex.dwMajorVersion, vi.dwMinorVersion, viex.dwMinorVersion, vi.dwPlatformId, viex.dwPlatformId);
-			//osname = "Windows (unknown version after 98)";
-			//break;
-		}
-
-		if (viex.wProductType == VER_NT_WORKSTATION) {
-			ntWorkStation = qtrue;
-		} else {
-			ntWorkStation = qfalse;
-		}
-
-		//FIXME home, enteprise, basic, etc...
-
-		// GetNativeSystemInfo() to ignore compatability mode?
-		//GetSystemInfo(&si);
-		GetNativeSystemInfo(&si);
-
-		switch (si.wProcessorArchitecture) {
-		case PROCESSOR_ARCHITECTURE_AMD64:
-			arch = "x64";
-			break;
-		case PROCESSOR_ARCHITECTURE_ARM:
-			arch = "ARM";
-			break;
-		case PROCESSOR_ARCHITECTURE_IA64:
-			arch = "Intel Itanium-based";
-			break;
-		case PROCESSOR_ARCHITECTURE_INTEL:
-			arch = "x86";
-			break;
-		case PROCESSOR_ARCHITECTURE_UNKNOWN:
-			arch = "unknown architecture";
-			break;
-		default:
-			arch = "???";
-			break;
-		}
-
-		switch (vi.dwMajorVersion) {
-		case 5:  // xp and 2000
-			switch (vi.dwMinorVersion) {
-			case 0:
-				osname = "Windows 2000";
-				break;
-			case 1:
-				osname = "Windows XP";
-				break;
-			case 2:
-				if (GetSystemMetrics(SM_SERVERR2)) {
-					osname = "Windows Server 2003 R2";
-				} else {
-					osname = "Windows Server 2003";
-				}
-				break;
-			default:
-				osname = "Windows (unknown version before vista)";
-				break;
-			}
-			break;
-		case 6:  // Vista, Windows 7, Windows 8
-			switch (vi.dwMinorVersion) {
-			case 0:
-				if (ntWorkStation) {
-					osname = "Windows Vista";
-				} else {
-					osname = "Windows Server 2008";
-				}
-				break;
-			case 1:
-				if (ntWorkStation) {
-					osname = "Windows 7";
-				} else {
-					osname = "Windows Server 2008 R2";
-				}
-				break;
-			case 2:
-				if (ntWorkStation) {
-					osname = "Windows 8";
-				} else {
-					osname = "Windows Server 2012";
-				}
-				break;
-			case 3:
-				if (ntWorkStation) {
-					osname = "Windows 8.1";
-				} else {
-					osname = "Windows Server 2012 R2";
-				}
-				break;
-			default:
-				osname = "Windows (unknown version after xp)";
-				break;
-			}
-			break;
-		case 10:
-			switch (vi.dwMinorVersion) {
-			case 0:
-				if (ntWorkStation) {
-					osname = "Windows 10";
-
-					// Windows 11 doesn't update major/minor versions
-					if (vi.dwBuildNumber >= 22000) {
-						osname = "Windows 11";
-					}
-				} else {
-					// Windows Server versions > 2016 don't update major/minor versions
-
-					// build number info from https://github.com/openjdk/jdk/blob/master/src/hotspot/os/windows/os_windows.cpp
-					if (vi.dwBuildNumber > 20347) {
-						osname = "Windows Server 2022";
-					} else if (vi.dwBuildNumber > 17762) {
-						osname = "Windows Server 2019";
-					} else {
-						osname = "Windows Server 2016";
-					}
-				}
-				break;
-			default:
-				osname = "Windows (unknown version after Windows 10)";
-				break;
-			}
-			break;
-		default:
-			osname = "Windows (unknown major version)";
-		}
-		break;
-	}
-	default:
-		osname = "Windows (unknown)";
-		arch = "???";
-		break;
-	}
-
-	Com_Printf("%s %s version %lu.%lu (%lu) Platform %lu  %s\n", osname, arch, vi.dwMajorVersion, vi.dwMinorVersion, vi.dwBuildNumber, vi.dwPlatformId, vi.szCSDVersion);
 }
 
 /*
@@ -1348,14 +1091,6 @@ void Sys_PlatformExit( void )
 	if(timerResolution)
 		timeEndPeriod(timerResolution);
 #endif
-
-	// re-enable screen blanking if previously disabled
-	SetThreadExecutionState(ES_CONTINUOUS);
-
-	if (GotHandle  &&  HStdout != INVALID_HANDLE_VALUE) {
-		SetConsoleTextAttribute(HStdout, ScreenBufferInfo.wAttributes);
-		fputs("\r\n", stderr);
-	}
 }
 
 /*
@@ -1409,19 +1144,6 @@ qboolean Sys_PIDIsRunning( int pid )
 	return qfalse;
 }
 
-void Sys_Backtrace_f (void)
-{
-	int pid;
-	char command[MAX_STRING_CHARS];
-
-	pid = _getpid();
-	Com_Printf("Sys_Backtrace_f() pid: %d\n", pid);
-	//execlp("gdb", "gdb", "--batch", "-n", "-ex", "thread", "-ex", "bt full", name_buf, pid_buf, NULL);
-	//system("./gdb --batch -n -ex thread -ex bt full ");
-	//snprintf(command, sizeof(command), "./gdb.exe --batch -n -ex thread -ex bt full wolfcamql.exe %d > bt.txt", pid);
-	snprintf(command, sizeof(command), "gdb.exe --batch -n -ex \"thread apply all bt full\" wolfcamql.exe %d > bt.txt", pid);
-	system(command);
-}
 
 void Sys_OpenQuakeLiveDirectory (void)
 {

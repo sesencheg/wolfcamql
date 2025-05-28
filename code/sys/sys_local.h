@@ -72,7 +72,6 @@ qboolean Sys_PIDIsRunning( int pid );
 char *Sys_ParseProtocolUri( const char *uri );
 #endif
 
-void Sys_Backtrace_f (void);
 qboolean Sys_FileIsDirectory (const char *path);
 qboolean Sys_FileExists (const char *path);
 qboolean Sys_CopyFile (const char *src, const char *dest);

@@ -45,7 +45,6 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include <fcntl.h>
 #include <fenv.h>
 #include <time.h>
-#include <execinfo.h>
 
 //#define _GNU_SOURCE
 //#ifndef _GNU_SOURCE
@@ -1524,111 +1523,28 @@ static void signal_crash (int signum, siginfo_t *info, void *ptr)
 
 #endif  //if defined(__APPLE__)  ||  DEDICATED
 
-void Sys_PlatformInit (qboolean useBacktrace, qboolean useConsoleOutput)
-{
-	struct sigaction action;
-	const char *term = getenv("TERM");
-	struct utsname un;
-	int err;
+/*
+==============
+Sys_PlatformInit
 
-	if (useBacktrace) {
-		memset(&action, 0, sizeof(action));
-		action.sa_sigaction = signal_crash;
-		action.sa_flags = SA_SIGINFO;
-		if(sigaction(SIGSEGV, &action, NULL) < 0) {
-			Com_Printf("^1ERROR setting SIGSEGV handler\n");
-		}
-		if(sigaction(SIGHUP, &action, NULL) < 0) {
-			Com_Printf("^1ERROR setting SIGHUP handler\n");
-		}
-		if(sigaction(SIGTRAP, &action, NULL) < 0) {
-			Com_Printf("^1ERROR setting SIGTRAP handler\n");
-		}
-		if(sigaction(SIGABRT, &action, NULL) < 0) {
-			Com_Printf("^1ERROR setting SIGABRT handler\n");
-		}
-		if(sigaction(SIGBUS, &action, NULL) < 0) {
-			Com_Printf("^1ERROR setting SIGBUS handler\n");
-		}
-		if(sigaction(SIGILL, &action, NULL) < 0) {
-			Com_Printf("^1ERROR setting SIGILL handler\n");
-		}
-		if(sigaction(SIGFPE, &action, NULL) < 0) {
-			Com_Printf("^1ERROR setting SIGFPE handler\n");
-		}
-		if(sigaction(SIGTERM, &action, NULL) < 0) {
-			Com_Printf("^1ERROR setting SIGTERM handler\n");
-		}
-		if(sigaction(SIGINT, &action, NULL) < 0) {
-			Com_Printf("^1ERROR setting SIGINT handler\n");
-		}
-	} else {
-		signal(SIGHUP, Sys_SigHandler);
-		signal(SIGQUIT, Sys_SigHandler);
-		signal(SIGTRAP, Sys_SigHandler);
-		signal(SIGABRT, Sys_SigHandler);
-		signal(SIGBUS, Sys_SigHandler);
-	}
+Unix specific initialisation
+==============
+*/
+void Sys_PlatformInit( void )
+{
+	const char* term = getenv( "TERM" );
+
+	signal( SIGHUP, Sys_SigHandler );
+	signal( SIGQUIT, Sys_SigHandler );
+	signal( SIGTRAP, Sys_SigHandler );
+	signal( SIGABRT, Sys_SigHandler );
+	signal( SIGBUS, Sys_SigHandler );
 
 	Sys_SetFloatEnv();
 
 	stdinIsATTY = isatty( STDIN_FILENO ) &&
 		!( term && ( !strcmp( term, "raw" ) || !strcmp( term, "dumb" ) ) );
-
-	err = uname(&un);
-	if (err == -1) {
-		Com_Printf("^1couldn't get uname() info\n");
-	} else {
-		Com_Printf("%s, %s, %s, %s\n", un.sysname, un.release, un.version, un.machine);
-	}
-
-#if defined(__linux__)   ||  defined(__APPLE__)
-	{
-		FILE *f;
-		char buf[32];
-		int n;
-#if defined(__linux__)
-		const char *fname = "/etc/os-release";
-#elif defined(__APPLE__)
-		const char *fname = "/System/Library/CoreServices/SystemVersion.plist";
-#else
-		const char *fname = NULL;
-#endif
-
-		if (fname) {
-			f = fopen(fname, "r");
-			if (f) {
-				while (1) {
-					n = fread(buf, 1, sizeof(buf) - 1, f);
-					if (n < 1) {
-						break;
-					}
-					if (ferror(f)) {
-						Com_Printf("^1couldn't read %s\n", fname);
-						break;
-					}
-					buf[n] = '\0';
-					Com_Printf("%s", buf);
-				}
-				Com_Printf("\n");
-				fclose(f);
-			}
-		}
-	}
-#elif 0  //defined(__APPLE__)
-	{
-		SInt32 majorVersion, minorVersion, bugFixVersion;
-
-		Gestalt(gestaltSystemVersionMajor, &majorVersion);
-		Gestalt(gestaltSystemVersionMinor, &minorVersion);
-		Gestalt(gestaltSystemVersionBugFix, &bugFixVersion);
-
-		//FIXME SInt32 on 64 bit
-		Com_Printf("Mac OS X %d.%d.%d\n", (int)majorVersion, (int)minorVersion, (int)bugFixVersion);
-	}
-#endif
 }
-
 /*
 ==============
 Sys_PlatformExit
@@ -1745,14 +1661,6 @@ void Sys_AnsiColorPrint( const char *msg )
 	}
 }
 
-void Sys_Backtrace_f (void)
-{
-	fprintf(stderr, "internal backtrace:\n");
-	print_dl_backtrace();
-
-	fprintf(stderr, "GDB backtrace:\n");
-	print_gdb_trace();
-}
 
 void Sys_OpenQuakeLiveDirectory (void)
 {
