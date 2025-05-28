@@ -2176,9 +2176,6 @@ Q3R2OBJ = \
   $(B)/renderergl2/tr_main.o \
   $(B)/renderergl2/tr_marks.o \
   $(B)/renderergl2/tr_mesh.o \
-  $(B)/renderergl2/tr_mme.o \
-  $(B)/renderergl2/tr_mme_common.o \
-  $(B)/renderergl2/tr_mme_sse2.o \
   $(B)/renderergl2/tr_model.o \
   $(B)/renderergl2/tr_model_iqm.o \
   $(B)/renderergl2/tr_noise.o \
@@ -2250,9 +2247,6 @@ Q3ROBJ = \
   $(B)/renderergl1/tr_main.o \
   $(B)/renderergl1/tr_marks.o \
   $(B)/renderergl1/tr_mesh.o \
-  $(B)/renderergl1/tr_mme.o \
-  $(B)/renderergl1/tr_mme_common.o \
-  $(B)/renderergl1/tr_mme_sse2.o \
   $(B)/renderergl1/tr_model.o \
   $(B)/renderergl1/tr_model_iqm.o \
   $(B)/renderergl1/tr_noise.o \
@@ -3325,12 +3319,6 @@ $(B)/renderergl1/%.o: $(RGL1DIR)/%.c
 
 $(B)/renderergl1/tr_altivec.o: $(RGL1DIR)/tr_altivec.c
 	$(DO_REF_CC_ALTIVEC)
-
-$(B)/renderergl1/tr_mme_sse2.o: $(RCOMMONDIR)/tr_mme_sse2.c
-	$(DO_REF_CC_SSE2)
-
-$(B)/renderergl2/tr_mme_sse2.o: $(RCOMMONDIR)/tr_mme_sse2.c
-	$(DO_REF_CC_SSE2)
 
 $(B)/renderergl2/glsl/%.c: $(RGL2DIR)/glsl/%.glsl $(STRINGIFY)
 	$(DO_REF_STR)
