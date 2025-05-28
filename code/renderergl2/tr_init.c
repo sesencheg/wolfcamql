@@ -2493,7 +2493,6 @@ void RE_Shutdown( qboolean destroyWindow ) {
 		GLSL_ShutdownGPUShaders();
 	}
 
-	R_MME_Shutdown();
 	R_DoneFreeType();
 
 	// shut down platform specific OpenGL stuff
