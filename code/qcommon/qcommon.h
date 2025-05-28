@@ -1078,6 +1078,7 @@ void S_ClearSoundBuffer( void );
 
 void SCR_DebugGraph (float value);	// FIXME: move logging to common?
 
+#define AVI_LINE_PADDING 4
 //
 // server interface
 //
