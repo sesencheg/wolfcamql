@@ -2327,6 +2327,7 @@ ifneq ($(USE_INTERNAL_JPEG),0)
     $(B)/renderergl1/jutils.o
 endif
 
+
 ifeq ($(ARCH),x86)
   Q3OBJ += \
     $(B)/client/snd_mixa.o \
@@ -2585,9 +2586,14 @@ endif
 ifeq ($(USE_INTERNAL_ZLIB),1)
 Q3OBJ += \
   $(B)/client/adler32.o \
+  $(B)/client/crc32.o \
   $(B)/client/deflate.o \
   $(B)/client/infback.o \
-  $(B)/client/trees.o
+  $(B)/client/inffast.o \
+  $(B)/client/inflate.o \
+  $(B)/client/inftrees.o \
+  $(B)/client/trees.o \
+  $(B)/client/zutil.o
 endif
 
 ifeq ($(HAVE_VM_COMPILED),true)
