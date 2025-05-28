@@ -2587,7 +2587,7 @@ Q3OBJ += \
   $(B)/client/adler32.o \
   $(B)/client/deflate.o \
   $(B)/client/infback.o \
-  $(B)/client/trees.o \  
+  $(B)/client/trees.o
 endif
 
 ifeq ($(HAVE_VM_COMPILED),true)
