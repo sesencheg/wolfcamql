@@ -1848,7 +1848,7 @@ void CG_ParseWarmup( void ) {
 	}
 
 	cg.warmupCount = -1;
-	//Com_Printf("^1sssssssssssssssssssssss  %d\n", warmup);
+	Com_Printf("^1sssssssssssssssssssssss  %d\n", warmup);
 
 	if ( warmup == 0 && cg.warmup ) {
 		Com_Printf("reset match start\n");
@@ -1885,7 +1885,7 @@ void CG_ParseWarmup( void ) {
 		}
 	}
 
-	//Com_Printf("parsewarmup %d  %d   %s\n", warmup, cg.warmup, info);
+	Com_Printf("parsewarmup %d  %d   %s\n", warmup, cg.warmup, info);
 	cg.warmup = warmup;
 }
 
