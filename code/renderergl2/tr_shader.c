@@ -4288,7 +4288,6 @@ void RE_GetShaderImageDimensions (qhandle_t h, int *width, int *height)
 
 void RE_GetShaderImageData(qhandle_t h, ubyte *data)
 {
-	return;
     shader_t *shader;
     image_t *image;
     GLint prevFbo;
