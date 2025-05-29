@@ -4285,66 +4285,41 @@ void RE_GetShaderImageDimensions (qhandle_t h, int *width, int *height)
 
 //FBO_t *FBO_Create(const char *name, int width, int height);
 
-void RE_GetShaderImageData (qhandle_t h, ubyte *data)
+void RE_GetShaderImageData (hndl_t h, ubyte *data)
 {
-	shader_t *shader;
-	image_t *image;
+    shader_t *shader;
+    image_t *image;
 
-	shader = R_GetShaderByHandle(h);
-	//image = &shader->stages[0].bundle[0].image;
-	image = shader->stages[0]->bundle[0].image[0];
+    shader = R_GetShaderByHandle(h);
+    image = shader->stages[0]->bundle[0].image[0];
 
-	//if (r_smp->integer) {
-	//	R_SyncRenderThread();
-	//}
+    // Предполагается, что FBO поддерживаются
+    int width = image->uploadWidth;
+    int height = image->uploadHeight;
 
-	//FIXME glGetTexImage() not supported
-	if (qglesMajorVersion >= 1) {
-		int width, height;
-		GLuint fbo;
-		//FBO_t *fbo;
-		FBO_t *currentFbo;
+    GLuint fbo;
+    // Создаем временный framebuffer
+    qglGenFramebuffers(1, &fbo);
+    qglBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-		//FIXME 2024-10-01  qglGenFramebuffers() crashing
-		//  from ioquake3 patch 2024-06-05-01 'OpenGL2: Add OpenGL ES 2.0+ support' :
-		//  "It's missing support for framebuffer objects which should be
-		// possible on ES 2."
-		return;
+    // Привязываем текстуру к FBO
+    qglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image->texnum, 0);
 
-		currentFbo = glState.currentFBO;
+    // Проверка статуса framebuffer
+    GLenum status = qglCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        // Обработка ошибок
+        qglDeleteFramebuffers(1, &fbo);
+        qglBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return;
+    }
 
-		width = shader->stages[0]->bundle[0].image[0]->uploadWidth;
-		height = shader->stages[0]->bundle[0].image[0]->uploadHeight;
+    // Читаем пиксели
+    qglReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-		//ri.Printf(PRINT_ALL, "     %p qglGenFramebuffers\n", qglGenFramebuffers);
-		//fbo = FBO_Create("_getImage", width, height);
-
-		qglGenFramebuffers(1, &fbo);
-
-		//FBO_Bind(fbo);
-		//ri.Printf(PRINT_ALL, "     done\n");
-
-		//qglBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		qglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image->texnum, 0);
-
-		qglReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		FBO_Bind(currentFbo);
-
-		//qglDeleteFramebuffers(1, &fbo);
-
-		return;
-	}
-
-
-	GL_BindMultiTexture(GL_TEXTURE0_ARB, GL_TEXTURE_2D, image->texnum);
-	//qglGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-	//FIXME
-	GL_BindMultiTexture(GL_TEXTURE0_ARB, GL_TEXTURE_2D, 0);
-
-	GL_CheckErrors();
+    // Восстанавливаем состояние
+    qglBindFramebuffer(GL_FRAMEBUFFER, 0);
+    qglDeleteFramebuffers(1, &fbo);
 }
 
 qhandle_t RE_GetSingleShader (void)
