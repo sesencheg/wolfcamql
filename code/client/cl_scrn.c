@@ -601,8 +601,8 @@ void SCR_UpdateScreen( void ) {
 			SCR_DrawScreenField( STEREO_LEFT );
 			SCR_DrawScreenField( STEREO_RIGHT );
 		} else {
-			//Com_Printf("1:  %d\n", (int)time(NULL));
-			//Com_Printf("1:  %d\n", Sys_Milliseconds());
+			Com_Printf("1:  %d\n", (int)time(NULL));
+			Com_Printf("1:  %d\n", Sys_Milliseconds());
 			SCR_DrawScreenField( STEREO_CENTER );
 		}
 
@@ -611,8 +611,8 @@ void SCR_UpdateScreen( void ) {
 		} else {
 			re.EndFrame( NULL, NULL );
 		}
-		//Com_Printf("2:  %d\n", (int)time(NULL));
-		//Com_Printf("2:  %d\n", Sys_Milliseconds());
+		Com_Printf("2:  %d\n", (int)time(NULL));
+		Com_Printf("2:  %d\n", Sys_Milliseconds());
 	} else {
 		//
 	}
