@@ -8232,7 +8232,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 		Com_Printf("^3forcing %s\n", cgs.mapname);
 	}
 	trap_GetRealMapName(cgs.mapname, cgs.realMapName, sizeof(cgs.realMapName));
-	//Com_Printf("^3map: '%s' -> '%s'\n", cgs.mapname, cgs.realMapName);
+	Com_Printf("^3map: '%s' -> '%s'\n", cgs.mapname, cgs.realMapName);
 	Q_strncpyz(buff, cgs.realMapName, sizeof(buff));
 	i = strlen(buff);
 	buff[i - 1] = 'g';
