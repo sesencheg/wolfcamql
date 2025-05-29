@@ -102,6 +102,7 @@ extern GLvoid (APIENTRYP qglBlitFramebufferEXT) (GLint srcX0, GLint srcY0, GLint
 	GLE(GLenum, GetError, void) \
 	GLE(void, GetIntegerv, GLenum pname, GLint *params) \
 	GLE(const GLubyte *, GetString, GLenum name) \
+	GLE(void, GetTexImage, GLenum target, GLint level, GLenum format, GLenum type, GLvoid * pixels) \
 	GLE(void, LineWidth, GLfloat width) \
 	GLE(void, PixelStorei, GLenum pname, GLint param) \
 	GLE(void, PolygonOffset, GLfloat factor, GLfloat units) \

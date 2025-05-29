@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../renderercommon/tr_public.h"
 #include "../cgame/cg_camera.h"
 #include "../client/cl_avi.h"
+#include "../renderercommon/tr_mme.h"
 
 #include "../renderercommon/qgl.h"
 #include "../renderercommon/iqm.h"
@@ -1463,7 +1464,7 @@ skin_t	*R_GetSkinByHandle( qhandle_t hSkin );
 
 int R_ComputeLOD( trRefEntity_t *ent );
 
-const void *RB_TakeVideoFrameCmd (const void *data);
+const void *RB_TakeVideoFrameCmd (const void *data, shotData_t *shotData);
 
 //
 // tr_shader.c
@@ -1967,6 +1968,7 @@ void R_Upload32( unsigned *data,
 						  int *format,
 			   int *pUploadWidth, int *pUploadHeight );
 void R_CreatePlayerColorSkinImages (qboolean force);
+void R_MME_Init (void);
 void R_TakeScreenshot( int x, int y, int width, int height, char *name, int type );
 mnode_t *R_PointInLeaf (const vec3_t p);
 void R_CreateSingleShader (void);
