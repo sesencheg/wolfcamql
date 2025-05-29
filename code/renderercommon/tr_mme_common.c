@@ -179,32 +179,17 @@ void blurCreate(mmeBlurControl_t* control, const char* type, int frames) {
 }
 
 static void MME_AccumClearMMX(void* w, const void* r, short mul, int count) {
-    const __m128i* reader = (const __m128i*)r;
-    __m128i* writer = (__m128i*)w;
-    int i;
-    __m128i readVal, zeroVal, work0, work1, multiply;
+    const unsigned char* reader = (const unsigned char*)r;
+    short* writer = (short*)w;
+    int i, j;
     
-    // Создаем вектор с множителем
-    multiply = _mm_set1_epi16(mul);
-    zeroVal = _mm_setzero_si128();
-    
-    for (i = count; i > 0; i--) {
-        readVal = _mm_loadu_si128(reader++);
-        
-        // Распаковка младших 8 байт
-        work0 = _mm_unpacklo_epi8(readVal, zeroVal);
-        // Распаковка старших 8 байт
-        work1 = _mm_unpackhi_epi8(readVal, zeroVal);
-        
-        // Умножение
-        work0 = _mm_mullo_epi16(work0, multiply);
-        work1 = _mm_mullo_epi16(work1, multiply);
-        
-        _mm_storeu_si128(writer++, work0);
-        _mm_storeu_si128(writer++, work1);
+    for (i = 0; i < count; i++) {
+        for (j = 0; j < 8; j++) {
+            writer[j] = ((short)reader[j]) * mul;
+        }
+        reader += 8;
+        writer += 8;
     }
-    
-    // Для Emscripten _mm_empty() не нужен, так как мы используем SSE
 }
 
 static void MME_AccumAddMMX( void *w, const void* r, short mul, int count ) {
