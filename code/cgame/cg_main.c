@@ -8214,7 +8214,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 	}
 
 	CG_ParseWarmup();
-	Com_Print ("CG_ParseWarmup");
+	Com_Printf ("CG_ParseWarmup");
 	if (cg.warmup) {
 		if (cg.demoPlayback) {
 			cg.demoHasWarmup = qtrue;
@@ -8224,7 +8224,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 
 	// load the new map
 	CG_LoadingString( "collision map" );
-	Com_Print ("CG_LoadingString");
+	Com_Printf ("CG_LoadingString");
 
 	Com_Printf("cgame: load map %s\n", cgs.mapname);
 	if (*SC_Cvar_Get_String("r_forceMap")) {
@@ -8240,7 +8240,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 	buff[i - 3] = 'c';
 	trap_SendConsoleCommand(va("exec %s\n", buff));
 	trap_CM_LoadMap( cgs.mapname );
-	Com_Print ("trap_CM_LoadMap");
+	Com_Printf ("trap_CM_LoadMap");
 
 	//COM_StripExtension(cgs.mapname, mname, sizeof(mname));
 	//trap_Cvar_Set("mapname", mname);
