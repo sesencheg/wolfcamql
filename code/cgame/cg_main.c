@@ -3944,7 +3944,7 @@ static void CG_RegisterGraphics( void ) {
 		if (w > 64  ||  h > 64) {
 			Com_Printf("^1skipping brightness for crosshair %d  (%d x %d)\n", i, w, h);
 		} else {
-			//trap_GetShaderImageData(cgs.media.crosshairShader[i], cgs.media.crosshairOrigImage[i]);
+			trap_GetShaderImageData(cgs.media.crosshairShader[i], cgs.media.crosshairOrigImage[i]);
 		}
 	}
 	CG_CreateNewCrosshairs();

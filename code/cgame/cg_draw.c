@@ -2635,7 +2635,7 @@ void CG_CreateNameSprite (float xf, float yf, float scale, const vec4_t color, c
 					return;
 				}
 
-				//trap_GetShaderImageData(glyph.glyph, fontImageData);
+				trap_GetShaderImageData(glyph.glyph, fontImageData);
 
 				// get sub image
 				n = glyph.s * (float)(fontImageWidth);
