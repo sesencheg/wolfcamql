@@ -2328,7 +2328,29 @@ ifneq ($(USE_INTERNAL_JPEG),0)
     $(B)/renderergl1/jutils.o
 endif
 
+ifeq ($(ARCH),x86_64)
+ifneq ($(USE_INTERNAL_ZLIB),0)
+  Q3ROBJ += \
+    $(B)/renderergl1/adler32.o \
+    $(B)/renderergl1/crc32.o \
+    $(B)/renderergl1/deflate.o \
+    $(B)/renderergl1/inffast.o \
+    $(B)/renderergl1/inflate.o \
+    $(B)/renderergl1/inftrees.o \
+    $(B)/renderergl1/trees.o \
+    $(B)/renderergl1/zutil.o
 
+  Q3R2OBJ += \
+    $(B)/renderergl2/adler32.o \
+    $(B)/renderergl2/crc32.o \
+    $(B)/renderergl2/deflate.o \
+    $(B)/renderergl2/inffast.o \
+    $(B)/renderergl2/inflate.o \
+    $(B)/renderergl2/inftrees.o \
+    $(B)/renderergl2/trees.o \
+    $(B)/renderergl2/zutil.o
+endif
+endif
 ifeq ($(ARCH),x86)
   Q3OBJ += \
     $(B)/client/snd_mixa.o \

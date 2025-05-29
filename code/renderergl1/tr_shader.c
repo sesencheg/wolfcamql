@@ -3744,29 +3744,29 @@ void RE_GetShaderImageData(qhandle_t h, ubyte *data)
     image = shader->stages[0]->bundle[0].image[0];
 
     // Сохраняем текущий FBO
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+    qglGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
     
     // Создаем временный FBO
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    qglGenFramebuffersEXT(1, &fbo);
+    qglBindFramebufferEXT(GL_FRAMEBUFFER, fbo);
     
     // Прикрепляем текстуру к FBO
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image->texnum, 0);
+    qglFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image->texnum, 0);
     
     // Проверяем статус FBO
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+    if(qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         // Ошибка при создании FBO
-        glDeleteFramebuffers(1, &fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
+        qglDeleteFramebuffersEXT(1, &fbo);
+        qglBindFramebufferEXT(GL_FRAMEBUFFER, prevFbo);
         return;
     }
     
     // Читаем пиксели из FBO
-    glReadPixels(0, 0, image->width, image->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    qglReadPixels(0, 0, image->width, image->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
     
     // Восстанавливаем предыдущий FBO и удаляем временный
-    glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
-    glDeleteFramebuffers(1, &fbo);
+    qglBindFramebufferEXT(GL_FRAMEBUFFER, prevFbo);
+    qglDeleteFramebuffersEXT(1, &fbo);
     
     GL_CheckErrors();
 }
