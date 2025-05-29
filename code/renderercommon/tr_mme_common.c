@@ -125,110 +125,57 @@ void R_MME_SaveShot( mmeShot_t *shot, int width, int height, float fps, byte *in
 }
 #endif
 
-void blurCreate( mmeBlurControl_t* control, const char* type, int frames ) {
-	float*  blurFloat = control->Float;
-	float	blurMax, strength;
-	float	blurHalf = 0.5f * ( frames - 1 );
-	float	bestStrength;
-	float	floatTotal;
-	int		passes, bestTotal;
-	int		i;
-	
-	if (blurHalf <= 0)
-		return;
+void blurCreate(mmeBlurControl_t* control, const char* type, int frames) {
+    float* blurFloat = control->Float;
+    float blurMax, strength;
+    float blurHalf = 0.5f * (frames - 1);
+    float bestStrength;
+    float floatTotal;
+    int passes, bestTotal;
+    int i;
 
-	if ( !Q_stricmp( type, "gaussian") || mme_blurStrength->value >= 1.0f) {
-		float strengthVal = (mme_blurStrength->value >= 1.0f) ? (mme_blurStrength->value / 10.0f) : 1.0f;
-		for (i = 0; i < frames ; i++) {
-			double xVal = ((i - blurHalf ) / blurHalf) * 3;
-			double expVal = exp( - (xVal * xVal)*strengthVal / 2);
-			double sqrtVal = 1.0f / sqrt( 2 * M_PI);
-			blurFloat[i] = sqrtVal * expVal;
-		}
-	} else if (!Q_stricmp( type, "triangle")) {
-		for (i = 0; i < frames; i++) {
-			if ( i <= blurHalf )
-				blurFloat[i] = 1 + i;
-			else
-				blurFloat[i] = 1 + ( frames - 1 - i);
-		}
-	} else {
-		for (i = 0; i < frames; i++) {
-			blurFloat[i] = 1;
-		}
-	}
+    if (blurHalf <= 0)
+        return;
 
-	floatTotal = 0;
-	blurMax = 0;
-	for (i = 0; i < frames; i++) {
-		if ( blurFloat[i] > blurMax )
-			blurMax = blurFloat[i];
-		floatTotal += blurFloat[i];
-	}
+    // Вычисление весов размытия (Gaussian, Triangle или Uniform)
+    if (!Q_stricmp(type, "gaussian") || mme_blurStrength->value >= 1.0f) {
+        float strengthVal = (mme_blurStrength->value >= 1.0f) ? (mme_blurStrength->value / 10.0f) : 1.0f;
+        for (i = 0; i < frames; i++) {
+            double xVal = ((i - blurHalf) / blurHalf) * 3;
+            double expVal = exp(-(xVal * xVal) * strengthVal / 2);
+            double sqrtVal = 1.0f / sqrt(2 * M_PI);
+            blurFloat[i] = sqrtVal * expVal;
+        }
+    } else if (!Q_stricmp(type, "triangle")) {
+        for (i = 0; i < frames; i++) {
+            if (i <= blurHalf)
+                blurFloat[i] = 1 + i;
+            else
+                blurFloat[i] = 1 + (frames - 1 - i);
+        }
+    } else { // Uniform (прямоугольное размытие)
+        for (i = 0; i < frames; i++) {
+            blurFloat[i] = 1;
+        }
+    }
 
-	floatTotal = 1 / floatTotal;
-	for (i = 0; i < frames; i++) 
-		blurFloat[i] *= floatTotal;
+    // Нормализация весов (сумма = 1)
+    floatTotal = 0;
+    blurMax = 0;
+    for (i = 0; i < frames; i++) {
+        if (blurFloat[i] > blurMax)
+            blurMax = blurFloat[i];
+        floatTotal += blurFloat[i];
+    }
 
-	bestStrength = 0;
-	bestTotal = 0;
-	strength = 128;
+    floatTotal = 1 / floatTotal;
+    for (i = 0; i < frames; i++)
+        blurFloat[i] *= floatTotal;
 
-	/* Check for best 256 match for MMX */
-	for (passes = 32;passes >0;passes--) {
-		int total = 0;
-		for (i = 0; i < frames; i++) 
-			total += strength * blurFloat[i];
-		if (total > 256) {
-			strength *= (256.0 / total);
-		} else if (total <= 256) {
-			if ( total > bestTotal) {
-				bestTotal = total;
-				bestStrength = strength;
-			}
-			strength *= (256.0 / total); 
-		} else {
-			bestTotal = total;
-			bestStrength = strength;
-			break;
-		}
-	}
-	for (i = 0; i < frames; i++) {
-		control->MMX[i] = bestStrength * blurFloat[i];
-	}
-
-	bestStrength = 0;
-	bestTotal = 0;
-	strength = 128;
-	/* Check for best 32768 match for MMX */
-	for (passes = 32;passes >0;passes--) {
-		int total = 0;
-		for (i = 0; i < frames; i++) 
-			total += strength * blurFloat[i];
-		if ( total > 32768 ) {
-			strength *= (32768.0 / total);
-		} else if (total <= 32767 ) {
-			if ( total > bestTotal) {
-				bestTotal = total;
-				bestStrength = strength;
-			}
-			strength *= (32768.0 / total); 
-		} else {
-			bestTotal = total;
-			bestStrength = strength;
-			break;
-		}
-	}
-	for (i = 0; i < frames; i++) {
-		control->SSE[i] = bestStrength * blurFloat[i];
-	}
-
-	control->totalIndex = 0;
-	control->totalIndex = frames;
-	control->overlapFrames = 0;
-	control->overlapIndex = 0;
-
-	_mm_empty();
+    // Установка параметров размытия
+    control->totalIndex = frames;
+    control->overlapFrames = 0;
+    control->overlapIndex = 0;
 }
 
 static void MME_AccumClearMMX( void* w, const void* r, short mul, int count ) {
