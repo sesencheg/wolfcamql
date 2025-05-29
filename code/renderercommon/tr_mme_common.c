@@ -192,23 +192,21 @@ static void MME_AccumClearMMX(void* w, const void* r, short mul, int count) {
     }
 }
 
-static void MME_AccumAddMMX( void *w, const void* r, short mul, int count ) {
-	const __m64 * reader = (const __m64 *) r;
-	__m64 *writer = (__m64 *) w;
-	int i;
-	__m64 zeroVal, multiply;
-	 multiply = _mm_set1_pi16( mul );
-	 zeroVal = _mm_setzero_si64();
-	 /* Add 2 pixels in a loop */
-	 for (i = count ; i>0 ; i--) {
-		 __m64 readVal = *reader++;
-		 __m64 work0 = _mm_mullo_pi16( multiply, _mm_unpacklo_pi8( readVal, zeroVal ) );
-		 __m64 work1 = _mm_mullo_pi16( multiply, _mm_unpackhi_pi8( readVal, zeroVal ) );
-		 writer[0] = _mm_add_pi16( writer[0], work0 );
-		 writer[1] = _mm_add_pi16( writer[1], work1 );
-		 writer += 2;
-	 }
-	 _mm_empty();
+static void MME_AccumAddMMX(void *w, const void* r, short mul, int count) {
+    const unsigned char* reader = (const unsigned char*)r;
+    short* writer = (short*)w;
+    int i, j;
+    
+    for (i = 0; i < count; i++) {
+        for (j = 0; j < 8; j++) {
+            // Распаковка байта в short и умножение на множитель
+            short value = (short)reader[j] * mul;
+            // Добавление к существующему значению
+            writer[j] += value;
+        }
+        reader += 8;  // Перемещаемся к следующему блоку из 8 байт
+        writer += 8;  // Перемещаемся к следующему блоку из 8 short
+    }
 }
 
 static void MME_AccumShiftMMX( const void  *r, void *w, int count ) {
