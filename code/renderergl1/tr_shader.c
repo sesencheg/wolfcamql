@@ -3689,39 +3689,44 @@ void RE_ReplaceShaderImage (qhandle_t h, const ubyte *data, int width, int heigh
 }
 
 
-qhandle_t RE_RegisterShaderFromData (const char *name, ubyte *data, int width, int height, qboolean mipmap, qboolean allowPicmip, int wrapClampMode, int lightmapIndex)
+void RE_GetShaderImageData(qhandle_t h, ubyte *data)
 {
-	qhandle_t h;
-	image_t *image;
-	shader_t *shader;
-	int flags = 0;
+    shader_t *shader;
+    image_t *image;
+    GLint prevFbo;
+    GLuint tempFbo;
+    GLenum status;
 
-	//if (r_smp->integer) {
-	//	R_SyncRenderThread();
-	//}
+    shader = R_GetShaderByHandle(h);
+    image = shader->stages[0]->bundle[0].image[0];
 
-	if (mipmap) {
-		flags |= IMGFLAG_MIPMAP;
-	}
-	if (allowPicmip) {
-		flags |= IMGFLAG_MIPMAP;
-	}
+    // Сохраняем текущий FBO
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
 
-	if (wrapClampMode == GL_CLAMP_TO_EDGE) {
-		flags |= IMGFLAG_CLAMPTOEDGE;
-	} else {
-		//flags |= IMGFLAG_REPEAT;
-	}
+    // Создаем временный FBO
+    qglGenFramebuffersEXT(1, &tempFbo);
+    qglBindFramebufferEXT(GL_FRAMEBUFFER, tempFbo);
 
-	image = R_CreateImage(name, data, width, height, IMGTYPE_COLORALPHA, flags, 0 );
-	h = RE_RegisterShaderFromImage(name, lightmapIndex, image, qfalse);  //qfalse);
-	shader = R_GetShaderByHandle(h);
-	//FIXME
-	shader->stages[0]->stateBits &= ~GLS_DEPTHTEST_DISABLE;
+    // Прикрепляем текстуру к FBO
+    qglFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image->texnum, 0);
 
-	GL_CheckErrors();
+    // Проверяем статус FBO
+    status = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        // Обработка ошибки
+        qglBindFramebufferEXT(GL_FRAMEBUFFER, prevFbo);
+        qglDeleteFramebuffersEXT(1, &tempFbo);
+        return;
+    }
 
-	return h;
+    // Читаем пиксели из FBO
+    qglReadPixels(0, 0, image->width, image->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+    // Восстанавливаем предыдущий FBO и удаляем временный
+    qglBindFramebufferEXT(GL_FRAMEBUFFER, prevFbo);
+    qglDeleteFramebuffersEXT(1, &tempFbo);
+
+    GL_CheckErrors();
 }
 
 void RE_GetShaderImageDimensions (qhandle_t h, int *width, int *height)
@@ -3731,29 +3736,6 @@ void RE_GetShaderImageDimensions (qhandle_t h, int *width, int *height)
 	shader = R_GetShaderByHandle(h);
 	*width = shader->stages[0]->bundle[0].image[0]->uploadWidth;
 	*height = shader->stages[0]->bundle[0].image[0]->uploadHeight;
-}
-
-void RE_GetShaderImageData (qhandle_t h, ubyte *data)
-{
-	shader_t *shader;
-	image_t *image;
-
-
-	shader = R_GetShaderByHandle(h);
-	//image = &shader->stages[0].bundle[0].image;
-	image = shader->stages[0]->bundle[0].image[0];
-
-	//if (r_smp->integer) {
-	//	R_SyncRenderThread();
-	//}
-
-	qglBindTexture(GL_TEXTURE_2D, image->texnum);
-	qglGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-	//FIXME
-	qglBindTexture(GL_TEXTURE_2D, 0);
-
-	GL_CheckErrors();
 }
 
 qhandle_t RE_GetSingleShader (void)
