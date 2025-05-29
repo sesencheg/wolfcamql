@@ -8223,7 +8223,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 	}
 
 	// load the new map
-	//CG_LoadingString( "collision map" );
+	CG_LoadingString( "collision map" );
 	Com_Printf ("CG_LoadingString");
 
 	Com_Printf("cgame: load map %s\n", cgs.mapname);
@@ -8251,7 +8251,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 
 	cg.loading = qtrue;		// force players to load instead of defer
 
-	//CG_LoadingString( "sounds" );
+	CG_LoadingString( "sounds" );
 
 	{
 		int i;
@@ -8287,7 +8287,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 
 	//CG_RegisterFonts();  //FIXME better place
 
-	//CG_LoadingString( "graphics" );
+	CG_LoadingString( "graphics" );
 
 	//Com_Printf("^1%d -> %d\n", cgs.gametype, GT_RED_ROVER);
 
@@ -8346,7 +8346,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 
 	CG_RegisterGraphics();
 
-	//CG_LoadingString( "clients" );
+	CG_LoadingString( "clients" );
 
 	CG_RegisterClients();		// if low on memory, some clients will be deferred
 	CG_CreateScoresFromClientInfo();
