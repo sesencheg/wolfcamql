@@ -209,24 +209,27 @@ static void MME_AccumAddMMX(void *w, const void* r, short mul, int count) {
     }
 }
 
-static void MME_AccumShiftMMX( const void  *r, void *w, int count ) {
-	const __m64 * reader = (const __m64 *) r;
-	__m64 *writer = (__m64 *) w;
-
-	int i;
-	__m64 work0, work1, work2, work3;
-	/* Handle 2 at once */
-	for (i = count/2;i>0;i--) {
-		work0 = _mm_srli_pi16 (reader[0], 8);
-		work1 = _mm_srli_pi16 (reader[1], 8);
-		work2 = _mm_srli_pi16 (reader[2], 8);
-		work3 = _mm_srli_pi16 (reader[3], 8);
-		reader += 4;
-		writer[0] = _mm_packs_pu16( work0, work1 );
-		writer[1] = _mm_packs_pu16( work2, work3 );
-		writer += 2;
-	}
-	_mm_empty();
+static void MME_AccumShiftMMX(const void *r, void *w, int count) {
+    const unsigned short* reader = (const unsigned short*)r;
+    unsigned char* writer = (unsigned char*)w;
+    int total_iterations = count * 4; // Process 4 elements per original MMX register
+    
+    for (int i = 0; i < total_iterations; i += 4) {
+        // Right shift each 16-bit value by 8 (equivalent to taking the high byte)
+        unsigned char b0 = (reader[i] >> 8) & 0xFF;
+        unsigned char b1 = (reader[i+1] >> 8) & 0xFF;
+        unsigned char b2 = (reader[i+2] >> 8) & 0xFF;
+        unsigned char b3 = (reader[i+3] >> 8) & 0xFF;
+        
+        // Pack the bytes into the output (same as _mm_packs_pu16)
+        writer[0] = b0;
+        writer[1] = b1;
+        writer[2] = b2;
+        writer[3] = b3;
+        
+        reader += 4;
+        writer += 4;
+    }
 }
 
 void R_MME_BlurAccumAdd( mmeBlurBlock_t *block, const __m64 *add ) {
