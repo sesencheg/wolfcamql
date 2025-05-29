@@ -8206,13 +8206,12 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 	}
 
 	s = CG_ConfigString( CS_LEVEL_START_TIME );
-	cgs.levelStartTime = atoi( s );
+	cgs.levelStartTime = atoi( s );	
 
-	Com_Printf ("CG_ParseWarmup");
-	
 	CG_ParseServerinfo(qtrue, qfalse);
 	if (cgs.protocolClass == PROTOCOL_QL) {
 		Com_Printf("^5ql%s ^5version %d.%d.%d.%d\n", cgs.isQuakeLiveBetaDemo ? " ^6beta" : "", cgs.qlversion[0], cgs.qlversion[1], cgs.qlversion[2], cgs.qlversion[3]);
+		Com_Printf ("CG_ParseWarmup\n");
 	}
 
 	CG_ParseWarmup();
