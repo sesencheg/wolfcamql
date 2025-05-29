@@ -8214,7 +8214,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 	}
 
 	CG_ParseWarmup();
-	Com_Printf("cg.warmup %d\n", cg.warmup);
+	
 	if (cg.warmup) {
 		if (cg.demoPlayback) {
 			cg.demoHasWarmup = qtrue;
@@ -8223,7 +8223,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 	}
 
 	// load the new map
-	CG_LoadingString( "collision map" );
+	//CG_LoadingString( "collision map" );
 	Com_Printf ("CG_LoadingString");
 
 	Com_Printf("cgame: load map %s\n", cgs.mapname);
