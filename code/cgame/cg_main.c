@@ -8214,7 +8214,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 	}
 
 	CG_ParseWarmup();
-	Com_Printf("cg.warmup %d\n", warmup);
+	Com_Printf("cg.warmup %d\n", cg.warmup);
 	if (cg.warmup) {
 		if (cg.demoPlayback) {
 			cg.demoHasWarmup = qtrue;
