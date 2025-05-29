@@ -3688,6 +3688,14 @@ void RE_ReplaceShaderImage (qhandle_t h, const ubyte *data, int width, int heigh
 
 }
 
+void RE_GetShaderImageDimensions (qhandle_t h, int *width, int *height)
+{
+	shader_t *shader;
+
+	shader = R_GetShaderByHandle(h);
+	*width = shader->stages[0]->bundle[0].image[0]->uploadWidth;
+	*height = shader->stages[0]->bundle[0].image[0]->uploadHeight;
+}
 
 void RE_GetShaderImageData(qhandle_t h, ubyte *data)
 {
@@ -3727,15 +3735,6 @@ void RE_GetShaderImageData(qhandle_t h, ubyte *data)
     qglDeleteFramebuffersEXT(1, &tempFbo);
 
     GL_CheckErrors();
-}
-
-void RE_GetShaderImageDimensions (qhandle_t h, int *width, int *height)
-{
-	shader_t *shader;
-
-	shader = R_GetShaderByHandle(h);
-	*width = shader->stages[0]->bundle[0].image[0]->uploadWidth;
-	*height = shader->stages[0]->bundle[0].image[0]->uploadHeight;
 }
 
 qhandle_t RE_GetSingleShader (void)
