@@ -3745,7 +3745,7 @@ void RE_GetShaderImageData(qhandle_t h, ubyte *data)
     image = shader->stages[0]->bundle[0].image[0];
 
     // Сохраняем текущий FBO
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+    qglGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
 
     // Создаем временный FBO
     qglGenFramebuffersEXT(1, &tempFbo);
