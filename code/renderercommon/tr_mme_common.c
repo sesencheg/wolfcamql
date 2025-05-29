@@ -178,24 +178,33 @@ void blurCreate(mmeBlurControl_t* control, const char* type, int frames) {
     control->overlapIndex = 0;
 }
 
-static void MME_AccumClearMMX( void* w, const void* r, short mul, int count ) {
-	const __m64 * reader = (const __m64 *) r;
-	__m64 *writer = (__m64 *) w;
-	int i; 
-	__m64 readVal, zeroVal, work0, work1, multiply;
-	 multiply = _mm_set1_pi16( mul );
-	 zeroVal = _mm_setzero_si64();
-	 for (i = count; i>0 ; i--) {
-		 readVal = *reader++;
-		 work0 = _mm_unpacklo_pi8( readVal, zeroVal );
-		 work1 = _mm_unpackhi_pi8( readVal, zeroVal );
-		 work0 = _mm_mullo_pi16( work0, multiply );
-		 work1 = _mm_mullo_pi16( work1, multiply );
-		 writer[0] = work0;
-		 writer[1] = work1;
-		 writer += 2;
-	 }
-	 _mm_empty();
+static void MME_AccumClearMMX(void* w, const void* r, short mul, int count) {
+    const __m128i* reader = (const __m128i*)r;
+    __m128i* writer = (__m128i*)w;
+    int i;
+    __m128i readVal, zeroVal, work0, work1, multiply;
+    
+    // Создаем вектор с множителем
+    multiply = _mm_set1_epi16(mul);
+    zeroVal = _mm_setzero_si128();
+    
+    for (i = count; i > 0; i--) {
+        readVal = _mm_loadu_si128(reader++);
+        
+        // Распаковка младших 8 байт
+        work0 = _mm_unpacklo_epi8(readVal, zeroVal);
+        // Распаковка старших 8 байт
+        work1 = _mm_unpackhi_epi8(readVal, zeroVal);
+        
+        // Умножение
+        work0 = _mm_mullo_epi16(work0, multiply);
+        work1 = _mm_mullo_epi16(work1, multiply);
+        
+        _mm_storeu_si128(writer++, work0);
+        _mm_storeu_si128(writer++, work1);
+    }
+    
+    // Для Emscripten _mm_empty() не нужен, так как мы используем SSE
 }
 
 static void MME_AccumAddMMX( void *w, const void* r, short mul, int count ) {
