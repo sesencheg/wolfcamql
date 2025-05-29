@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "tr_local.h"
 
+#include "../renderercommon/tr_mme.h"
+
 #include "tr_dsa.h"
 
 glconfig_t  glConfig;
@@ -251,9 +253,6 @@ cvar_t *r_defaultSystemFontFallbacks;
 cvar_t *r_defaultUnifontFallbacks;
 
 cvar_t	*r_marksOnTriangleMeshes;
-
-cvar_t	*r_aviMotionJpegQuality;
-cvar_t	*r_screenshotJpegQuality;
 
 cvar_t	*r_maxpolys;
 int		max_polys;
@@ -1640,109 +1639,9 @@ void R_ExportCubemaps_f(void)
 RB_TakeVideoFrameCmd
 ==================
 */
-const void *RB_TakeVideoFrameCmd( const void *data )
-{
-	const videoFrameCommand_t	*cmd;
-	byte				*cBuf;
-	size_t				memcount, bytesPerPixel, linelen, avilinelen;
-	int				padwidth, avipadwidth, padlen, avipadlen;
-	int				yin, xin, xout;
-	GLint packAlign, format;
 
-	// finish any 2D drawing if needed
-	if(tess.numIndexes)
-		RB_EndSurface();
-
-	cmd = (const videoFrameCommand_t *)data;
-	
-	// OpenGL ES is only required to support reading GL_RGBA
-	if (qglesMajorVersion >= 1) {
-		format = GL_RGBA;
-		bytesPerPixel = 4;
-	} else {
-		format = GL_RGB;
-		bytesPerPixel = 3;
-	}
-
-	qglGetIntegerv(GL_PACK_ALIGNMENT, &packAlign);
-
-	linelen = cmd->width * bytesPerPixel;
-
-	// Alignment stuff for glReadPixels
-	padwidth = PAD(linelen, packAlign);
-	padlen = padwidth - linelen;
-
-	avilinelen = cmd->width * 3;
-
-	// AVI line padding
-	avipadwidth = PAD(avilinelen, AVI_LINE_PADDING);
-	avipadlen = avipadwidth - avilinelen;
-
-	cBuf = PADP(cmd->captureBuffer, packAlign);
-		
-	qglReadPixels(0, 0, cmd->width, cmd->height, format,
-		GL_UNSIGNED_BYTE, cBuf);
-
-	memcount = padwidth * cmd->height;
-
-	// gamma correct
-	if(glConfig.deviceSupportsGamma)
-		R_GammaCorrect(cBuf, memcount);
-
-	if(cmd->motionJpeg)
-	{
-		// Convert RGBA to RGB, in place, line by line
-		if (format == GL_RGBA) {
-			linelen = cmd->width * 3;
-			padlen = padwidth - linelen;
-
-			for (yin = 0; yin < cmd->height; yin++) {
-				for (xin = 0, xout = 0; xout < linelen; xin += 4, xout += 3) {
-					cBuf[yin*padwidth + xout + 0] = cBuf[yin*padwidth + xin + 0];
-					cBuf[yin*padwidth + xout + 1] = cBuf[yin*padwidth + xin + 1];
-					cBuf[yin*padwidth + xout + 2] = cBuf[yin*padwidth + xin + 2];
-				}
-			}
-		}
-
-		memcount = RE_SaveJPGToBuffer(cmd->encodeBuffer, avilinelen * cmd->height,
-			r_aviMotionJpegQuality->integer,
-			cmd->width, cmd->height, cBuf, padlen);
-		//ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, memcount);
-	}
-	else
-	{
-		byte *lineend, *memend;
-		byte *srcptr, *destptr;
-	
-		srcptr = cBuf;
-		destptr = cmd->encodeBuffer;
-		memend = srcptr + memcount;
-		
-		// swap R and B and remove line paddings
-		while(srcptr < memend)
-		{
-			lineend = srcptr + linelen;
-			while(srcptr < lineend)
-			{
-				*destptr++ = srcptr[2];
-				*destptr++ = srcptr[1];
-				*destptr++ = srcptr[0];
-				srcptr += bytesPerPixel;
-			}
-			
-			Com_Memset(destptr, '\0', avipadlen);
-			destptr += avipadlen;
-			
-			srcptr += padlen;
-		}
-		
-		//ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
-	}
-
-	return (const void *)(cmd + 1);	
-}
-
+// RB_TakeVideoFrameCmd
+#include "../renderercommon/inc_tr_init.c"
 
 
 //============================================================================
@@ -2238,9 +2137,6 @@ void R_Register( void )
 
 	r_marksOnTriangleMeshes = ri.Cvar_Get("r_marksOnTriangleMeshes", "0", CVAR_ARCHIVE);
 
-	r_aviMotionJpegQuality = ri.Cvar_Get("r_aviMotionJpegQuality", "90", CVAR_ARCHIVE);
-	r_screenshotJpegQuality = ri.Cvar_Get("r_screenshotJpegQuality", "90", CVAR_ARCHIVE);
-
 	r_maxpolys = ri.Cvar_Get( "r_maxpolys", va("%d", MAX_POLYS), 0);
 	r_maxpolyverts = ri.Cvar_Get( "r_maxpolyverts", va("%d", MAX_POLYVERTS), 0);
 	r_jpegCompressionQuality = ri.Cvar_Get("r_jpegCompressionQuality", "90", CVAR_ARCHIVE);
@@ -2430,7 +2326,9 @@ void R_Init( void ) {
 
 	R_InitFreeType();
 
-	R_InitQueries();	
+	R_InitQueries();
+
+	R_MME_Init();
 
 	// to show update for color skins
 	if (glRefConfig.framebufferObject) {
@@ -2491,6 +2389,7 @@ void RE_Shutdown( qboolean destroyWindow ) {
 		GLSL_ShutdownGPUShaders();
 	}
 
+	R_MME_Shutdown();
 	R_DoneFreeType();
 
 	// shut down platform specific OpenGL stuff
@@ -2619,6 +2518,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.GetShaderImageData = RE_GetShaderImageData;
 	re.AddRefEntityPtrToScene = RE_AddRefEntityPtrToScene;
 	re.BeginHud = RE_BeginHud;
-	
+	re.UpdateDof = RE_UpdateDof;
+
 	return &re;
 }

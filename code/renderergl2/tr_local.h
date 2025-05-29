@@ -36,6 +36,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #include "../renderercommon/iqm.h"
 #include "../renderercommon/qgl.h"
 
+#include "../renderercommon/tr_mme.h"
+
 #define GLE(ret, name, ...) extern name##proc * qgl##name;
 QGL_1_1_PROCS;
 QGL_DESKTOP_1_1_PROCS;
@@ -2156,7 +2158,7 @@ skin_t	*R_GetSkinByHandle( qhandle_t hSkin );
 
 int R_ComputeLOD( trRefEntity_t *ent );
 
-const void *RB_TakeVideoFrameCmd (const void *data);
+const void *RB_TakeVideoFrameCmd (const void *data, shotData_t *shotData);
 
 //
 // tr_shader.c
@@ -2718,6 +2720,7 @@ image_t *R_CreateImage2( const char *name, byte *pic, int width, int height, GLe
 
 void RE_SetPathLines (int *numCameraPoints, cameraPoint_t *cameraPoints, int *numSplinePoints, vec3_t *splinePoints, const vec4_t color);
 void R_CreatePlayerColorSkinImages (qboolean force);
+void R_MME_Init (void);
 void RE_Get_Advertisements(int *num, float *verts, char shaders[][MAX_QPATH]);
 void RE_BeginHud (void);
 
