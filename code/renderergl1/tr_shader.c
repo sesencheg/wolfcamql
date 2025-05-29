@@ -3688,6 +3688,42 @@ void RE_ReplaceShaderImage (qhandle_t h, const ubyte *data, int width, int heigh
 
 }
 
+qhandle_t RE_RegisterShaderFromData (const char *name, ubyte *data, int width, int height, qboolean mipmap, qboolean allowPicmip, int wrapClampMode, int lightmapIndex)
+{
+	qhandle_t h;
+	image_t *image;
+	shader_t *shader;
+	int flags = 0;
+
+	//if (r_smp->integer) {
+	//	R_SyncRenderThread();
+	//}
+
+	if (mipmap) {
+		flags |= IMGFLAG_MIPMAP;
+	}
+	if (allowPicmip) {
+		flags |= IMGFLAG_MIPMAP;
+	}
+
+	if (wrapClampMode == GL_CLAMP_TO_EDGE) {
+		flags |= IMGFLAG_CLAMPTOEDGE;
+	} else {
+		//flags |= IMGFLAG_REPEAT;
+	}
+
+	image = R_CreateImage(name, data, width, height, IMGTYPE_COLORALPHA, flags, 0 );
+	h = RE_RegisterShaderFromImage(name, lightmapIndex, image, qfalse);  //qfalse);
+	shader = R_GetShaderByHandle(h);
+	//FIXME
+	shader->stages[0]->stateBits &= ~GLS_DEPTHTEST_DISABLE;
+
+	GL_CheckErrors();
+
+	return h;
+}
+
+
 void RE_GetShaderImageDimensions (qhandle_t h, int *width, int *height)
 {
 	shader_t *shader;
