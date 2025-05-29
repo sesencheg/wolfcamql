@@ -1840,7 +1840,7 @@ void CG_ParseWarmup( void ) {
 		info = CG_ConfigStringNoConvert(CSCPMA_GAMESTATE);
 		warmup = atoi(Info_ValueForKey(info, "tw"));
 	} else if (cgs.protocolClass == PROTOCOL_QL) {
-		info = CG_ConfigString( CS_WARMUP );
+		info = CG_ConfigString( CS_WARMUP );		
 		warmup = atoi(Info_ValueForKey(info, "time"));
 	} else {
 		info = CG_ConfigString(CSQ3_WARMUP);
@@ -1848,7 +1848,7 @@ void CG_ParseWarmup( void ) {
 	}
 
 	cg.warmupCount = -1;
-	Com_Printf("^1sssssssssssssssssssssss  %d\n", warmup);
+	//Com_Printf("^1sssssssssssssssssssssss  %d\n", warmup);
 
 	if ( warmup == 0 && cg.warmup ) {
 		Com_Printf("reset match start\n");
@@ -1885,7 +1885,7 @@ void CG_ParseWarmup( void ) {
 		}
 	}
 
-	Com_Printf("parsewarmup %d  %d   %s\n", warmup, cg.warmup, info);
+	//Com_Printf("parsewarmup %d  %d   %s\n", warmup, cg.warmup, info);
 	cg.warmup = warmup;
 }
 
