@@ -8212,9 +8212,9 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 	if (cgs.protocolClass == PROTOCOL_QL) {
 		Com_Printf("^5ql%s ^5version %d.%d.%d.%d\n", cgs.isQuakeLiveBetaDemo ? " ^6beta" : "", cgs.qlversion[0], cgs.qlversion[1], cgs.qlversion[2], cgs.qlversion[3]);
 	}
-
-	CG_ParseWarmup();
 	Com_Printf ("CG_ParseWarmup");
+	CG_ParseWarmup();
+	
 	if (cg.warmup) {
 		if (cg.demoPlayback) {
 			cg.demoHasWarmup = qtrue;
