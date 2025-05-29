@@ -4285,7 +4285,7 @@ void RE_GetShaderImageDimensions (qhandle_t h, int *width, int *height)
 
 //FBO_t *FBO_Create(const char *name, int width, int height);
 
-void RE_GetShaderImageData (hndl_t h, ubyte *data)
+void RE_GetShaderImageData (qhandle_t h, ubyte *data)
 {
     shader_t *shader;
     image_t *image;
