@@ -1230,7 +1230,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 		if (r_ignoreEntityMergable->integer == 0) {
 			useMergable = qtrue;
-		} else if (r_ignoreEntityMergable->integer == 2  &&  mme_saveDepth->integer == 0) {
+		} else if (r_ignoreEntityMergable->integer == 2) {
 			useMergable = qtrue;
 		} else {
 			useMergable = qfalse;
@@ -1791,14 +1791,6 @@ const void	*RB_DrawSurfs( const void *data ) {
 		float x, y;
 		qboolean adjustOrigin = qfalse;
 
-		if ((tr.recordingVideo  ||  mme_dofVisualize->integer)  &&  mme_dofFrames->integer > 0) {
-			if (r_anaglyphMode->integer == 19  &&  *ri.SplitVideo  &&  !tr.leftRecorded) {
-				adjustOrigin = R_MME_JitterOrigin(&x, &y, qfalse);
-			} else {
-				adjustOrigin = R_MME_JitterOrigin(&x, &y, qtrue);
-			}
-		}
-
 		if (adjustOrigin) {
 			orientationr_t* or = &backEnd.viewParms.or;
 			orientationr_t* world = &backEnd.viewParms.world;
@@ -2276,13 +2268,6 @@ void RB_ExecuteRenderCommands( const void *data ) {
 
 	//FIXME splitting rendering between world and hud will not work correctly when R_IssuePendingRenderCommands() is used  -- 2018-08-10 hack added to only run R_IssuePendingRenderCommands() at the end of frame
 
-	if (tr.recordingVideo  ||  mme_dofVisualize->integer) {
-		R_MME_CheckCvars(qfalse, &shotDataMain);
-		if (r_anaglyphMode->integer == 19  &&  *ri.SplitVideo) {
-			R_MME_CheckCvars(qfalse, &shotDataLeft);
-		}
-	}
-
 	t1 = ri.RealMilliseconds();
 	dataOrig = data;
 
@@ -2341,23 +2326,9 @@ void RB_ExecuteRenderCommands( const void *data ) {
 					RB_EndSurface();
 				}
 
-				if (!shotDataLeft.workAlloc) {
-					ri.Error(ERR_DROP, "shotDataLeft memory not allocated");
-				}
-
-				if (tr.drawSurfsCount) {
-					if (R_MME_MultiPassNext(qfalse)) {
-						R_InitNextFrameNoCommands();
-						goto videoCommandCheckDone;
-					}
-
-					// blit mme dof
-					if (mme_dofFrames->integer > 1  &&  tr.recordingVideo  &&  R_MME_GetPassData(qfalse)  &&  !shotDataLeft.allocFailed) {
-						byte *buffer;
-
-						buffer = R_MME_GetPassData(qfalse);
-						RE_StretchRawRectScreen(buffer);
-					}
+				if (tr.drawSurfsCount) {					
+					R_InitNextFrameNoCommands();
+					goto videoCommandCheckDone;					
 				}
 
 				// draw hud
@@ -2482,42 +2453,6 @@ void RB_ExecuteRenderCommands( const void *data ) {
 	}
 
 	/* Take and merge DOF frames */
-	if ((tr.recordingVideo  ||  mme_dofVisualize->integer)  &&  tr.drawSurfsCount) {
-		if (R_MME_MultiPassNext(qtrue)) {
-			R_InitNextFrameNoCommands();
-			goto videoCommandCheckDone;
-		}
-
-		// blit mme dof
-
-		if (mme_dofFrames->integer > 1  &&  (tr.recordingVideo  ||  mme_dofVisualize->integer)  &&  R_MME_GetPassData(qtrue)  &&  !shotDataMain.allocFailed) {
-			byte *buffer;
-			//int i, j;
-
-			buffer = R_MME_GetPassData(qtrue);
-
-#if 0  // testing
-			for (i = 0;  i < glConfig.vidHeight;  i++) {
-				for (j = 0;  j < glConfig.vidWidth;  j++) {
-					byte *p;
-					p = buffer + i * glConfig.vidWidth * 3 + j * 3;
-					if (j == glConfig.vidWidth / 2) {
-						p[0] = 255;
-						p[1] = 0;
-						p[2] = 0;
-					} else {
-						//p[0] = 0;
-						//p[1] = 0;
-						//p[2] = 0;
-					}
-				}
-			}
-#endif
-
-			RE_StretchRawRectScreen(buffer);
-		}
-	}
-
 	// video command is in it's own render list, so drawing doesn't always
 	// take place
 

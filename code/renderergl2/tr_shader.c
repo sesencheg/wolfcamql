@@ -4285,41 +4285,42 @@ void RE_GetShaderImageDimensions (qhandle_t h, int *width, int *height)
 
 //FBO_t *FBO_Create(const char *name, int width, int height);
 
-void RE_GetShaderImageData (qhandle_t h, ubyte *data)
+void RE_GetShaderImageData(qhandle_t h, ubyte *data)
 {
     shader_t *shader;
     image_t *image;
+    GLuint fbo;
+    GLint prevFbo;
 
     shader = R_GetShaderByHandle(h);
     image = shader->stages[0]->bundle[0].image[0];
 
-    // Предполагается, что FBO поддерживаются
-    int width = image->uploadWidth;
-    int height = image->uploadHeight;
-
-    GLuint fbo;
-    // Создаем временный framebuffer
-    qglGenFramebuffers(1, &fbo);
-    qglBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    // Привязываем текстуру к FBO
-    qglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image->texnum, 0);
-
-    // Проверка статуса framebuffer
-    GLenum status = qglCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        // Обработка ошибок
-        qglDeleteFramebuffers(1, &fbo);
-        qglBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // Сохраняем текущий FBO
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+    
+    // Создаем временный FBO
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    
+    // Прикрепляем текстуру к FBO
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, image->texnum, 0);
+    
+    // Проверяем статус FBO
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        // Ошибка при создании FBO
+        glDeleteFramebuffers(1, &fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
         return;
     }
-
-    // Читаем пиксели
-    qglReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
-    // Восстанавливаем состояние
-    qglBindFramebuffer(GL_FRAMEBUFFER, 0);
-    qglDeleteFramebuffers(1, &fbo);
+    
+    // Читаем пиксели из FBO
+    glReadPixels(0, 0, image->width, image->height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    
+    // Восстанавливаем предыдущий FBO и удаляем временный
+    glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
+    glDeleteFramebuffers(1, &fbo);
+    
+    GL_CheckErrors();
 }
 
 qhandle_t RE_GetSingleShader (void)
