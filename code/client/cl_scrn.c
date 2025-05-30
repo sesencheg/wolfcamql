@@ -515,9 +515,7 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 
 	// if the menu is going to cover the entire screen, we
 	// don't need to render anything under it
-	if ( uivm && !uiFullscreen ) {
-		Com_Printf("state Start:  %d\n", Sys_Milliseconds());
-		Com_Printf("state Start:  %u\n", clc.state);
+	if ( uivm && !uiFullscreen ) {				
 		switch( clc.state ) {
 		default:
 			Com_Error( ERR_FATAL, "SCR_DrawScreenField: bad clc.state" );
@@ -541,9 +539,10 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			break;
 		case CA_LOADING:
 		case CA_PRIMED:
+			Com_Printf("state Start:  %u\n", clc.state);
 			// draw the game information screen and loading progress
 			CL_CGameRendering(stereoFrame);
-
+			Com_Printf("state End:  %d\n", Sys_Milliseconds());
 			// also draw the connection information, so it doesn't
 			// flash away too briefly on local or lan games
 			// refresh to update the time
@@ -559,7 +558,7 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 #endif
 			break;
 		}
-		Com_Printf("state End:  %d\n", Sys_Milliseconds());
+		
 	}
 
 	// the menu draws next
