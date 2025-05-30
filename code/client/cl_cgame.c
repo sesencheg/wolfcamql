@@ -1655,8 +1655,9 @@ void CL_CGameRendering( stereoFrame_t stereo ) {
 	int startTime;
 
 	startTime = Sys_Milliseconds();
-	//VM_Call(cgvm, CG_DRAW_ACTIVE_FRAME, cl.serverTime, stereo, clc.demoplaying, di.streaming, di.waitingForStream, CL_VideoRecording(&afdMain), (int)(Overf * SUBTIME_RESOLUTION), qtrue);
-	VM_Call( cgvm, CG_DRAW_ACTIVE_FRAME, cl.serverTime, stereo, clc.demoplaying );
+	Com_Printf("VM_Call start:  %d\n", Sys_Milliseconds());
+	VM_Call(cgvm, CG_DRAW_ACTIVE_FRAME, cl.serverTime, stereo, clc.demoplaying, di.streaming, di.waitingForStream, CL_VideoRecording(&afdMain), (int)(Overf * SUBTIME_RESOLUTION), qtrue);
+	Com_Printf("VM_Call end:  %d\n", Sys_Milliseconds());
 	clc.cgameTime += (Sys_Milliseconds() - startTime);
 	VM_Debug( 0 );
 	//cl.draw = qtrue;
