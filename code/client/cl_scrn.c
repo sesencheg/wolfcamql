@@ -498,7 +498,7 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 	
 	re.BeginFrame(stereoFrame);
 
-	Com_Printf("uiFullscreen Start:  %d\n", Sys_Milliseconds());
+	
 	
 	
 	uiFullscreen = (uivm && VM_Call( uivm, UI_IS_FULLSCREEN ));
@@ -511,13 +511,12 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			re.DrawStretchPic( 0, 0, cls.glconfig.vidWidth, cls.glconfig.vidHeight, 0, 0, 0, 0, cls.whiteShader );
 			re.SetColor( NULL );
 		}
-	}
-
-	Com_Printf("uiFullscreen End:  %d\n", Sys_Milliseconds());
+	}	
 
 	// if the menu is going to cover the entire screen, we
 	// don't need to render anything under it
 	if ( uivm && !uiFullscreen ) {
+		Com_Printf("state Start:  %d\n", Sys_Milliseconds());
 		switch( clc.state ) {
 		default:
 			Com_Error( ERR_FATAL, "SCR_DrawScreenField: bad clc.state" );
@@ -559,6 +558,7 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 #endif
 			break;
 		}
+		Com_Printf("state End:  %d\n", Sys_Milliseconds());
 	}
 
 	// the menu draws next
