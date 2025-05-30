@@ -86,7 +86,7 @@ CG_LoadingString
 void CG_LoadingString( const char *s ) {
 	Q_strncpyz( cg.infoScreenText, s, sizeof( cg.infoScreenText ) );
 	Com_Printf("loadingstring '%s'\n", s);
-	//trap_UpdateScreen();
+	trap_UpdateScreen();
 }
 
 /*
