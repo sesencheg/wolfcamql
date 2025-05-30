@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #include "vm_local.h"
 
-//#define	DEBUG_VM
+#define	DEBUG_VM
 #ifdef DEBUG_VM
 static char	*opnames[256] = {
 	"OP_UNDEF", 
@@ -367,7 +367,7 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 	*opStack = 0xDEADBEEF;
 	opStackOfs = 0;
 
-//	vm_debugLevel=2;
+	vm_debugLevel=2;
 	// main interpreter loop, will exit when a LEAVE instruction
 	// grabs the -1 program counter
 
@@ -376,7 +376,7 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 	while ( 1 ) {
 		int		opcode,	r0, r1;
 //		unsigned int	r2;
-Com_Printf( "%s %s\n", DEBUGSTR, opnames[opcode] );
+
 nextInstruction:
 		r0 = opStack[opStackOfs];
 		r1 = opStack[(uint8_t) (opStackOfs - 1)];
