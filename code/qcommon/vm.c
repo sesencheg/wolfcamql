@@ -877,14 +877,12 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 							args[8],  args[9], args[10], args[11]);
 	} else {
 #if ( id386 || idsparc ) && !defined __clang__ // calling convention doesn't need conversion in some cases
-		Com_Printf("^idsparc \n");
+		
 #ifndef NO_VM_COMPILED
-		if ( vm->compiled )
-			Com_Printf("^VM_CallCompiled \n");
+		if ( vm->compiled )			
 			r = VM_CallCompiled( vm, (int*)&callnum );
 		else
-#endif
-			Com_Printf("^VM_CallInterpreted \n");
+#endif			
 			r = VM_CallInterpreted( vm, (int*)&callnum );
 #else
 		struct {
@@ -901,9 +899,11 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 		va_end(ap);
 #ifndef NO_VM_COMPILED
 		if ( vm->compiled )
+			Com_Printf("^VM_CallCompiled \n");
 			r = VM_CallCompiled( vm, &a.callnum );
 		else
 #endif
+			Com_Printf("^VM_CallInterpreted \n");
 			r = VM_CallInterpreted( vm, &a.callnum );
 #endif
 	}
