@@ -835,9 +835,9 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 	currentVM = vm;
 	lastVM = vm;
 
-	if ( vm_debugLevel ) {
+	//if ( vm_debugLevel ) {
 	  Com_Printf( "VM_Call( %d )\n", callnum );
-	}
+	//}
 
 #ifdef CGAME_HARD_LINKED
 	if (vm == (vm_t *)1) {  // hack
