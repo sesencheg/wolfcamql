@@ -898,12 +898,10 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 		}
 		va_end(ap);
 #ifndef NO_VM_COMPILED
-		if ( vm->compiled )
-			Com_Printf("^VM_CallCompiled \n");
+		if ( vm->compiled )			
 			r = VM_CallCompiled( vm, &a.callnum );
 		else
-#endif
-			Com_Printf("^VM_CallInterpreted \n");
+#endif			
 			r = VM_CallInterpreted( vm, &a.callnum );
 #endif
 	}
