@@ -517,7 +517,7 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 	// don't need to render anything under it
 	if ( uivm && !uiFullscreen ) {
 		Com_Printf("state Start:  %d\n", Sys_Milliseconds());
-		Com_Printf("state Start:  %s\n", clc.state);
+		Com_Printf("state Start:  %u\n", clc.state);
 		switch( clc.state ) {
 		default:
 			Com_Error( ERR_FATAL, "SCR_DrawScreenField: bad clc.state" );
