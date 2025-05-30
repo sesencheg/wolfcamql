@@ -1001,7 +1001,27 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 // We can't call Com_EventLoop here, a restart will crash and this _does_ happen
 // if there is a map change while we are downloading at pk3.
 // ZOID
-		SCR_UpdateScreen();
+		if (cl.draw) {
+
+
+#if 0  // still a problem with /vid_restart, etc.. that calls VM shutdown
+			// get input and pump events to make window responsive during the
+			// loading screen
+			IN_Frame();
+			// option to skip network processing added to Com_EventLoop() to
+			// prevent crashing mentioned above.
+			Com_EventLoop(qfalse);
+			//Com_EventLoop(qtrue);
+			Cbuf_Execute();
+#endif
+
+			SCR_UpdateScreen();
+
+#if 0
+			S_Update();
+			Con_RunConsole();
+#endif
+		}
 		return 0;
 	case CG_CM_LOADMAP:
 		CL_CM_LoadMap( VMA(1) );
