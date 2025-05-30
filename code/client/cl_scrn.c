@@ -496,9 +496,10 @@ This will be called twice if rendering in stereo mode
 void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 	qboolean uiFullscreen;
 	
-	Com_Printf("BeginFrame Start:  %d\n", Sys_Milliseconds());
 	re.BeginFrame(stereoFrame);
-	Com_Printf("BeginFrame End:  %d\n", Sys_Milliseconds());
+
+	Com_Printf("uiFullscreen Start:  %d\n", Sys_Milliseconds());
+	
 	
 	uiFullscreen = (uivm && VM_Call( uivm, UI_IS_FULLSCREEN ));
 
@@ -511,6 +512,8 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			re.SetColor( NULL );
 		}
 	}
+
+	Com_Printf("uiFullscreen End:  %d\n", Sys_Milliseconds());
 
 	// if the menu is going to cover the entire screen, we
 	// don't need to render anything under it
