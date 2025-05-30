@@ -840,17 +840,14 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 	}
 
 #ifdef CGAME_HARD_LINKED
-	if (vm == (vm_t *)1) {  // hack
-		Com_Printf("^va_start %d\n", callnum);
+	if (vm == (vm_t *)1) {  // hack		
 		int args[12];
 		va_list ap;
 		va_start(ap, callnum);
 		for (i = 0; i < ARRAY_LEN(args); i++) {
-			args[i] = va_arg(ap, int);
-			Com_Printf("^va_arg %i\n", i);
+			args[i] = va_arg(ap, int);			
 		}
-		va_end(ap);		
-		Com_Printf("^va_end %d\n", callnum);
+		va_end(ap);				
 		r = CgvmMain( callnum,  args[0],  args[1],  args[2], args[3],
                             args[4],  args[5],  args[6], args[7],
 					  args[8],  args[9], args[10], args[11]);
@@ -880,11 +877,14 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 							args[8],  args[9], args[10], args[11]);
 	} else {
 #if ( id386 || idsparc ) && !defined __clang__ // calling convention doesn't need conversion in some cases
+		Com_Printf("^idsparc \n");
 #ifndef NO_VM_COMPILED
 		if ( vm->compiled )
+			Com_Printf("^VM_CallCompiled \n");
 			r = VM_CallCompiled( vm, (int*)&callnum );
 		else
 #endif
+			Com_Printf("^VM_CallInterpreted \n");
 			r = VM_CallInterpreted( vm, (int*)&callnum );
 #else
 		struct {
