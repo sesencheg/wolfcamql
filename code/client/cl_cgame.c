@@ -1653,7 +1653,7 @@ CL_CGameRendering
 */
 void CL_CGameRendering( stereoFrame_t stereo ) {
 	int startTime;
-
+	VM_Debug( 1 );
 	startTime = Sys_Milliseconds();
 	Com_Printf("VM_Call start:  %d\n", Sys_Milliseconds());
 	VM_Call(cgvm, CG_DRAW_ACTIVE_FRAME, cl.serverTime, stereo, clc.demoplaying, di.streaming, di.waitingForStream, CL_VideoRecording(&afdMain), (int)(Overf * SUBTIME_RESOLUTION), qtrue);
