@@ -841,14 +841,16 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 
 #ifdef CGAME_HARD_LINKED
 	if (vm == (vm_t *)1) {  // hack
+		Com_Printf("^va_start %d\n", callnum);
 		int args[12];
 		va_list ap;
 		va_start(ap, callnum);
 		for (i = 0; i < ARRAY_LEN(args); i++) {
 			args[i] = va_arg(ap, int);
+			Com_Printf("^va_arg %i\n", i);
 		}
-		va_end(ap);
-		Com_Printf("^6vmCall %d\n", callnum);
+		va_end(ap);		
+		Com_Printf("^va_end %d\n", callnum);
 		r = CgvmMain( callnum,  args[0],  args[1],  args[2], args[3],
                             args[4],  args[5],  args[6], args[7],
 					  args[8],  args[9], args[10], args[11]);
