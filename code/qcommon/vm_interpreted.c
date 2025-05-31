@@ -380,6 +380,8 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 nextInstruction:
 		r0 = opStack[opStackOfs];
 		r1 = opStack[(uint8_t) (opStackOfs - 1)];
+		Com_Printf( "r0 %i\n", r0);
+		Com_Printf( "r1 %i\n", r1);
 nextInstruction2:
 #ifdef DEBUG_VM
 		if ( (unsigned)programCounter >= vm->codeLength ) {
@@ -403,8 +405,7 @@ nextInstruction2:
 		profileSymbol->profileCount++;
 #endif
 		opcode = codeImage[ programCounter++ ];
-		switch ( opcode ) {			
-			Com_Printf( "opcode %i\n", opcode);
+		switch ( opcode ) {						
 #ifdef DEBUG_VM
 		default:
 			Com_Error( ERR_DROP, "Bad VM instruction" );  // this should be scanned on load!
