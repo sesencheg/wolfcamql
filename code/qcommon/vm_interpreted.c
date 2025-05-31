@@ -405,7 +405,7 @@ nextInstruction2:
 		opcode = codeImage[ programCounter++ ];
 
 		switch ( opcode ) {
-			Com_Printf( "opcode %s\n", opcode);
+			Com_Printf( "opcode %i\n", opcode);
 #ifdef DEBUG_VM
 		default:
 			Com_Error( ERR_DROP, "Bad VM instruction" );  // this should be scanned on load!
