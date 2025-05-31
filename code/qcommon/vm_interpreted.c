@@ -367,7 +367,6 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 	*opStack = 0xDEADBEEF;
 	opStackOfs = 0;
 
-	Com_Printf( "opcode %i\n", opStack);
 //	vm_debugLevel=2;
 	// main interpreter loop, will exit when a LEAVE instruction
 	// grabs the -1 program counter
@@ -404,7 +403,7 @@ nextInstruction2:
 		profileSymbol->profileCount++;
 #endif
 		opcode = codeImage[ programCounter++ ];
-
+		Com_Printf( "opcode %i\n", opcode);
 		switch ( opcode ) {			
 #ifdef DEBUG_VM
 		default:
