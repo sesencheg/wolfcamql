@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #include "vm_local.h"
 
-#define	DEBUG_VM
+//#define	DEBUG_VM
 #ifdef DEBUG_VM
 static char	*opnames[256] = {
 	"OP_UNDEF", 
@@ -367,7 +367,7 @@ int	VM_CallInterpreted( vm_t *vm, int *args ) {
 	*opStack = 0xDEADBEEF;
 	opStackOfs = 0;
 
-	vm_debugLevel=2;
+//	vm_debugLevel=2;
 	// main interpreter loop, will exit when a LEAVE instruction
 	// grabs the -1 program counter
 
@@ -405,6 +405,7 @@ nextInstruction2:
 		opcode = codeImage[ programCounter++ ];
 
 		switch ( opcode ) {
+			Com_Printf( "opcode %s\n", opcode);
 #ifdef DEBUG_VM
 		default:
 			Com_Error( ERR_DROP, "Bad VM instruction" );  // this should be scanned on load!
