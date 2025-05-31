@@ -403,9 +403,8 @@ nextInstruction2:
 		profileSymbol->profileCount++;
 #endif
 		opcode = codeImage[ programCounter++ ];
-		Com_Printf( "programCounter %i\n", programCounter);
-		Com_Printf( "opcode %i\n", opcode);
 		switch ( opcode ) {			
+			Com_Printf( "opcode %i\n", opcode);
 #ifdef DEBUG_VM
 		default:
 			Com_Error( ERR_DROP, "Bad VM instruction" );  // this should be scanned on load!
