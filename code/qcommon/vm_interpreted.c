@@ -403,6 +403,7 @@ nextInstruction2:
 		profileSymbol->profileCount++;
 #endif
 		opcode = codeImage[ programCounter++ ];
+		Com_Printf( "programCounter %i\n", programCounter);
 		Com_Printf( "opcode %i\n", opcode);
 		switch ( opcode ) {			
 #ifdef DEBUG_VM
