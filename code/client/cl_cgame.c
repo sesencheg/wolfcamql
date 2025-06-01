@@ -1014,8 +1014,9 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 			//Com_EventLoop(qtrue);
 			Cbuf_Execute();
 #endif
-
+			Com_Printf("Start SCR_UpdateScreen\n");
 			SCR_UpdateScreen();
+			Com_Printf("End SCR_UpdateScreen\n");
 
 #if 0
 			S_Update();
