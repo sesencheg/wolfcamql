@@ -909,6 +909,8 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 
 	if ( oldVM != NULL )
 	  currentVM = oldVM;
+
+	Com_Printf( "END VM_CallInterpreted %s vm\n", vm->name );
 	return r;
 }
 
