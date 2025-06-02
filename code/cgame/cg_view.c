@@ -5772,25 +5772,21 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 	cg.demoStreaming = demoStreaming;
 	cg.demoWaitingForStream = demoWaitingForStream;
 
-	Com_Printf("start trap_autoWriteConfig\n");
+	
 	//trap_autoWriteConfig(qtrue);
-	Com_Printf("end trap_autoWriteConfig\n");
+	
 
-	Com_Printf("start CG_CheckCvarChange\n");
+	
 	CG_CheckCvarChange();
-	Com_Printf("end CG_CheckCvarChange\n");
-	Com_Printf("start CG_CheckRepeatKeys\n");
+	
 	CG_CheckRepeatKeys();
-	Com_Printf("end CG_CheckRepeatKeys\n");
-	Com_Printf("start CG_CheckCvarInterp\n");
+	
 	CG_CheckCvarInterp();
-	Com_Printf("end CG_CheckCvarInterp\n");
-	Com_Printf("start CG_CheckAtCommands\n");
+	
 	CG_CheckAtCommands();
-	Com_Printf("end CG_CheckAtCommands\n");
+	
 
-	if (cg.looping  &&  serverTime >= cg.loopEndTime) {
-		Com_Printf("looping\n");
+	if (cg.looping  &&  serverTime >= cg.loopEndTime) {		
 		trap_SendConsoleCommand(va("seekservertime %f\n", (double)cg.loopStartTime));
 		//cg.demoSeeking = qfalse;  //FIXME maybe?
 		return;
