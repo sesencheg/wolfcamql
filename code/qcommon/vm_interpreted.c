@@ -585,11 +585,11 @@ nextInstruction2:
 				Com_Printf( "%s<--- %s\n", DEBUGSTR, VM_ValueToSymbol( vm, programCounter ) );
 			}
 #endif
-			// check for leaving the VM
-			Com_Printf( "programCounter %i\n", programCounter);
+			// check for leaving the VM			
 			if ( programCounter == -1 ) {
 				goto done;
 			} else if ( (unsigned)programCounter >= vm->codeLength ) {
+				Com_Printf( "programCounter %i\n", programCounter);
 				Com_Error( ERR_DROP, "VM program counter out of range in OP_LEAVE" );
 				return 0;
 			}

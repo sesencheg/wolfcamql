@@ -605,10 +605,8 @@ void SCR_UpdateScreen( void ) {
 			SCR_DrawScreenField( STEREO_RIGHT );
 		} else {
 			//Com_Printf("1:  %d\n", (int)time(NULL));
-			//Com_Printf("1:  %d\n", Sys_Milliseconds());
-			Com_Printf("Start SCR_DrawScreenField\n");
-			SCR_DrawScreenField( STEREO_CENTER );
-			Com_Printf("End SCR_DrawScreenField\n");
+			//Com_Printf("1:  %d\n", Sys_Milliseconds());			
+			SCR_DrawScreenField( STEREO_CENTER );			
 		}
 
 		if ( com_speeds->integer ) {
