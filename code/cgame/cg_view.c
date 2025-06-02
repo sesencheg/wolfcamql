@@ -5234,7 +5234,7 @@ static void CG_CheckCvarInterp (void)
 		//Com_Printf("real:%d setting '%s' to %f\n", c->realTime, c->cvar,  c->startValue + (c->endValue - c->startValue) * f);
 	}
 
-	trap_autoWriteConfig(qtrue);
+	//trap_autoWriteConfig(qtrue);
 }
 
 static void CG_CheckAtCommands (void)
