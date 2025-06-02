@@ -5740,7 +5740,7 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	cg.videoRecording = videoRecording;
 	cg.ioverf = ioverf;
-	//Com_Printf("ioverf %d\n", ioverf);
+	Com_Printf("ioverf %d\n", ioverf);
 	cg.foverf = (double)ioverf / SUBTIME_RESOLUTION;
 	cg.draw = draw;
 	cg.realTime = trap_Milliseconds();
@@ -5756,7 +5756,7 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 	demo.play.fraction = (float)cg.foverf;
 	demo.serverTime = serverTime;
 
-	//Com_Printf("%d  %f  %f\n", cg.time, cg.ftime, cg.foverf);
+	Com_Printf("%d  %f  %f\n", cg.time, cg.ftime, cg.foverf);
 
 	if (cg.ftime != cg.cameraPointCommandTime) {
 		//cg.cameraPointCommandTime = -1;
@@ -5780,12 +5780,14 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 	CG_CheckAtCommands();
 
 	if (cg.looping  &&  serverTime >= cg.loopEndTime) {
-		//Com_Printf("looping\n");
+		Com_Printf("looping\n");
 		trap_SendConsoleCommand(va("seekservertime %f\n", (double)cg.loopStartTime));
 		//cg.demoSeeking = qfalse;  //FIXME maybe?
 		return;
 	}
 
+	Com_Printf("cg.fragForwarding %f\n", cg.fragForwarding);
+	
 	if (cg.fragForwarding) {
 		int cn, st;
 		int cn2, st2;
