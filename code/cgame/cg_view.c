@@ -5710,7 +5710,7 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 	trap_GetGlconfig( &cgs.glconfig );
 	cgs.screenXScale = cgs.glconfig.vidWidth / 640.0;
 	cgs.screenYScale = cgs.glconfig.vidHeight / 480.0;
-	//Com_Printf("w %d  h %d\n", cgs.glconfig.vidWidth, cgs.glconfig.vidHeight);
+	Com_Printf("w %d  h %d\n", cgs.glconfig.vidWidth, cgs.glconfig.vidHeight);
 	memcpy(&cgDC.glconfig, &cgs.glconfig, sizeof(glconfig_t));
 	cgDC.widescreen = cg_wideScreen.integer;
 
