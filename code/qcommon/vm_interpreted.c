@@ -590,8 +590,8 @@ nextInstruction2:
 			if ( programCounter == -1 ) {
 				goto done;
 			} else if ( (unsigned)programCounter >= vm->codeLength ) {
-				//Com_Error( ERR_DROP, "VM program counter out of range in OP_LEAVE" );
-				//return 0;
+				Com_Error( ERR_DROP, "VM program counter out of range in OP_LEAVE" );
+				return 0;
 			}
 			goto nextInstruction;
 
