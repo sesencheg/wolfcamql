@@ -901,8 +901,7 @@ intptr_t QDECL VM_Call( vm_t *vm, int callnum, ... )
 		if ( vm->compiled )			
 			r = VM_CallCompiled( vm, &a.callnum );
 		else
-#endif			
-			Com_Printf( "Start VM_CallInterpreted %s vm\n", vm->name );
+#endif					
 			r = VM_CallInterpreted( vm, &a.callnum );
 #endif
 	}

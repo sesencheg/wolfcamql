@@ -539,15 +539,12 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			break;
 		case CA_LOADING:
 		case CA_PRIMED:			
-			// draw the game information screen and loading progress
-			Com_Printf("Start CL_CGameRendering\n");
+			// draw the game information screen and loading progress			
 			CL_CGameRendering(stereoFrame);			
 			// also draw the connection information, so it doesn't
 			// flash away too briefly on local or lan games
-			// refresh to update the time
-			Com_Printf("Start VM_Call( uivm, UI_REFRESH, cls.realtime )\n");
-			VM_Call( uivm, UI_REFRESH, cls.realtime );
-			Com_Printf("Start VM_Call( uivm, UI_DRAW_CONNECT_SCREEN, qtrue )\n");
+			// refresh to update the time			
+			VM_Call( uivm, UI_REFRESH, cls.realtime );			
 			VM_Call( uivm, UI_DRAW_CONNECT_SCREEN, qtrue );
 			break;
 		case CA_ACTIVE:
