@@ -5192,7 +5192,7 @@ static void CG_CheckCvarInterp (void)
 	cvarInterp_t *c;
 
 	if (SC_Cvar_Get_Int("com_autoWriteConfig") == 2) {
-		trap_autoWriteConfig(qfalse);
+		//trap_autoWriteConfig(qfalse);
 	}
 
 	for (i = 0;  i < MAX_CVAR_INTERP;  i++) {
@@ -5773,7 +5773,7 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 	cg.demoWaitingForStream = demoWaitingForStream;
 
 	Com_Printf("start trap_autoWriteConfig\n");
-	trap_autoWriteConfig(qtrue);
+	//trap_autoWriteConfig(qtrue);
 	Com_Printf("end trap_autoWriteConfig\n");
 
 	Com_Printf("start CG_CheckCvarChange\n");
