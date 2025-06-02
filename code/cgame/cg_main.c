@@ -86,9 +86,9 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
 	case CG_CONSOLE_COMMAND:
 		return CG_ConsoleCommand();
 	case CG_DRAW_ACTIVE_FRAME:
-		//Com_Printf("^5active start\n");
+		Com_Printf("^5active start\n");
 		CG_DrawActiveFrame(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-		//Com_Printf("^5active end\n");
+		Com_Printf("^5active end\n");
 		return 0;
 	case CG_CROSSHAIR_PLAYER:
 		return CG_CrosshairPlayer();
