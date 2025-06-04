@@ -2063,6 +2063,12 @@ RB_DrawSurfs
 
 =============
 */
+/*
+=============
+RB_DrawSurfs
+
+=============
+*/
 const void	*RB_DrawSurfs( const void *data ) {
 	const drawSurfsCommand_t	*cmd;
 	qboolean isShadowView;
@@ -2078,47 +2084,6 @@ const void	*RB_DrawSurfs( const void *data ) {
 	backEnd.viewParms = cmd->viewParms;
 
 	isShadowView = !!(backEnd.viewParms.flags & VPF_DEPTHSHADOW);
-
-	//FIXME not here?
-	// from q3mme
-	//Jitter the camera origin
-	if ( !backEnd.viewParms.isPortal && !(backEnd.refdef.rdflags & RDF_NOWORLDMODEL) ) {
-		int i;
-		float x, y;
-		qboolean adjustOrigin = qfalse;
-
-		if ((tr.recordingVideo  ||  mme_dofVisualize->integer)  &&  mme_dofFrames->integer > 0) {
-			if (r_anaglyphMode->integer == 19  &&  *ri.SplitVideo  &&  !tr.leftRecorded) {
-				adjustOrigin = R_MME_JitterOrigin(&x, &y, qfalse);
-			} else {
-				adjustOrigin = R_MME_JitterOrigin(&x, &y, qtrue);
-			}
-		}
-
-		if (adjustOrigin) {
-			orientationr_t* or = &backEnd.viewParms.or;
-			orientationr_t* world = &backEnd.viewParms.world;
-
-//			VectorScale( or->axis[0], 0.5, or->axis[0] );
-//			VectorScale( or->axis[1], 0.3, or->axis[1] );
-//			VectorScale( or->axis[2], 0.8, or->axis[2] );
-			VectorMA( or->origin, x, or->axis[1], or->origin );
-			VectorMA( or->origin, y, or->axis[2], or->origin );
-//			or->origin[2] += 4000;
-//			or->origin[2] += 0.1 * x;
-			R_RotateForWorld( or, world );
-			for ( i = 0; i < 16; i++ ) {
-				////int r = (rand() & 0xffff ) - 0x4000;
-				//world->modelMatrix[i] *= (0.9 + r * 0.0001);
-				//or->modelMatrix[i] *= (0.9 + r * 0.0001);
-			}
-		} else {
-			for ( i = 0; i < 16; i++ ) {
-//				int r = (rand() & 0xffff ) - 0x4000;
-//				backEnd.viewParms.world.modelMatrix[i] *= (0.9 + r * 0.0001);
-			}
-		}
-	}
 
 	// clear the z buffer, set the modelview, etc
 	RB_BeginDrawingView ();
@@ -2357,10 +2322,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 
 	if (!isShadowView)
 	{
-		//RE_DrawPathLines();
 		RB_RenderDrawSurfList( cmd->drawSurfs, cmd->numDrawSurfs );
-
-		RE_DrawPathLines();
 
 		if (r_drawSun->integer)
 		{
@@ -2402,11 +2364,7 @@ const void	*RB_DrawSurfs( const void *data ) {
 	{
 		cubemap_t *cubemap = &tr.cubemaps[backEnd.viewParms.targetFboCubemapIndex];
 
-		if (tr.usingFinalFrameBufferObject) {
-			FBO_Bind(tr.finalFbo);
-		} else {
-			FBO_Bind(NULL);
-		}
+		FBO_Bind(NULL);
 		if (cubemap && cubemap->image)
 			qglGenerateTextureMipmapEXT(cubemap->image->texnum, GL_TEXTURE_CUBE_MAP);
 	}
