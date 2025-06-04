@@ -1341,9 +1341,6 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 	case CG_GETSHADERIMAGEDIMENSIONS:
 		re.GetShaderImageDimensions(args[1], VMA(2), VMA(3));
 		return 0;
-	case CG_GETSHADERIMAGEDATA:
-		re.GetShaderImageData(args[1], VMA(2));
-		return 0;
 	case CG_CALCSPLINE:
 		CL_CalcSpline(args[1], VMF(2), VMA(3));
 		return 0;

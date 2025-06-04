@@ -201,7 +201,6 @@ qboolean trap_GetNextVictim (int us, int serverTime, int *victim, int *foundServ
 void trap_ReplaceShaderImage (qhandle_t h, const ubyte *data, int width, int height);
 qhandle_t trap_RegisterShaderFromData (const char *name, const ubyte *data, int width, int height, qboolean mipmap, qboolean allowPicmip, int wrapClampMode, int lightmapIndex);
 void trap_GetShaderImageDimensions (qhandle_t h, int *width, int *height);
-void trap_GetShaderImageData (qhandle_t h, ubyte *data);
 void trap_CalcSpline (int step, float tension, float *out);
 qhandle_t trap_R_GetSingleShader (void);
 

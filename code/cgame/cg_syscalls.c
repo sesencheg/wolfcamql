@@ -553,11 +553,6 @@ void trap_GetShaderImageDimensions (qhandle_t h, int *width, int *height)
 	syscall(CG_GETSHADERIMAGEDIMENSIONS, h, width, height);
 }
 
-void trap_GetShaderImageData (qhandle_t h, ubyte *data)
-{
-	syscall(CG_GETSHADERIMAGEDATA, h, data);
-}
-
 void trap_CalcSpline (int step, float tension, float *out)
 {
 	syscall(CG_CALCSPLINE, step, PASSFLOAT(tension), out);

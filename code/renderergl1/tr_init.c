@@ -2249,7 +2249,6 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.ReplaceShaderImage = RE_ReplaceShaderImage;
 	re.RegisterShaderFromData = RE_RegisterShaderFromData;
 	re.GetShaderImageDimensions = RE_GetShaderImageDimensions;
-	re.GetShaderImageData = RE_GetShaderImageData;
 	re.GetSingleShader = RE_GetSingleShader;
 	re.BeginHud = RE_BeginHud;
 	re.UpdateDof = RE_UpdateDof;

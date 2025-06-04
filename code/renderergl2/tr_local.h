@@ -2710,7 +2710,6 @@ void R_ConvertTextureFormat( const byte *in, int width, int height, GLenum forma
 
 // wolfcamql
 void RE_GetShaderImageDimensions (qhandle_t h, int *width, int *height);
-void RE_GetShaderImageData (qhandle_t h, ubyte *data);
 qhandle_t RE_RegisterShaderFromData (const char *name, ubyte *data, int width, int height, qboolean mipmap, qboolean allowPicmip, int wrapClampMode, int lightmapIndex);
 void RE_ReplaceShaderImage (qhandle_t h, const ubyte *data, int width, int height);
 

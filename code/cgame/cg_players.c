@@ -1643,10 +1643,7 @@ void CG_NewClientInfo( int clientNum ) {
 		} else {
 			name = newInfo.name;
 		}
-		//Com_Printf("name: '%s'\n", name);
-		//CG_CreateNameSprite(0, 0, 1.0, colorWhite, name, 0, 0, 0, font, cgs.clientNameImage[clientNum], 48 * MAX_QPATH, 48);
-		//CG_CreateNameSprite(0, 0, 1.0, colorWhite, name, 0, 0, 0, font, cgs.clientNameImage[clientNum], NAME_SPRITE_GLYPH_DIMENSION * MAX_QPATH, NAME_SPRITE_GLYPH_DIMENSION + (NAME_SPRITE_SHADOW_OFFSET * 2));
-		CG_CreateNameSprite(0, 0, 1.0, colorWhite, name, 0, 0, 0, font, cgs.clientNameImage[clientNum]);
+		//Com_Printf("name: '%s'\n", name);		
 	}
 
 	// colors

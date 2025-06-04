@@ -2668,33 +2668,6 @@ void CG_ForceModelChange( void ) {
 	}
 }
 
-static void CG_CreateNameSprites (void)
-{
-	int i;
-	const fontInfo_t *font;
-	const char *name;
-
-	if (*cg_drawPlayerNamesFont.string) {
-		font = &cgs.media.playerNamesFont;
-	} else {
-		font = &cgDC.Assets.textFont;
-	}
-
-	for (i = 0;  i < MAX_CLIENTS;  i++) {
-		if (!cgs.clientinfo[i].infoValid) {
-			continue;
-		}
-
-		if (*cgs.clientinfo[i].clanTag) {
-			name = va("%s ^7%s", cgs.clientinfo[i].clanTag, cgs.clientinfo[i].name);
-		} else {
-			name = cgs.clientinfo[i].name;
-		}
-		//CG_CreateNameSprite(0, 0, 1.0, colorWhite, name, 0, 0, 0, font, cgs.clientNameImage[i], NAME_SPRITE_GLYPH_DIMENSION * MAX_QPATH, NAME_SPRITE_GLYPH_DIMENSION + (NAME_SPRITE_SHADOW_OFFSET * 2));
-		CG_CreateNameSprite(0, 0, 1.0, colorWhite, name, 0, 0, 0, font, cgs.clientNameImage[i]);
-	}
-}
-
 /*
 =================
 CG_UpdateCvars
@@ -2752,22 +2725,6 @@ void CG_UpdateCvars( void ) {
 	if ( forceModelModificationCount != cg_forceModel.modificationCount ) {
 		forceModelModificationCount = cg_forceModel.modificationCount;
 		CG_ForceModelChange();
-	}
-
-	// such bullshit
-	//FIXME just fucking change it
-	if (cgs.media.playerNamesStyleModificationCount != cg_drawPlayerNamesStyle.modificationCount) {
-		CG_CreateNameSprites();
-		cgs.media.playerNamesStyleModificationCount = cg_drawPlayerNamesStyle.modificationCount;
-	} else if (cgs.media.playerNamesPointSizeModificationCount != cg_drawPlayerNamesPointSize.modificationCount) {
-		CG_CreateNameSprites();
-		cgs.media.playerNamesPointSizeModificationCount = cg_drawPlayerNamesPointSize.modificationCount;
-	} else if (cgs.media.playerNamesColorModificationCount != cg_drawPlayerNamesColor.modificationCount) {
-		CG_CreateNameSprites();
-		cgs.media.playerNamesColorModificationCount = cg_drawPlayerNamesColor.modificationCount;
-	} else if (cgs.media.playerNamesAlphaModificationCount != cg_drawPlayerNamesAlpha.modificationCount) {
-		CG_CreateNameSprites();
-		cgs.media.playerNamesAlphaModificationCount = cg_drawPlayerNamesAlpha.modificationCount;
 	}
 
 	//FIXME map restart
@@ -2962,10 +2919,6 @@ void CG_CheckFontUpdates (void)
 	CG_CheckIndividualFontUpdate(&cgs.media.rewardsFont, cg_drawRewardsPointSize.integer, &cg_drawRewardsFont, &cgs.media.rewardsFontModificationCount, &cg_drawRewardsPointSize, &cgs.media.rewardsFontPointSizeModificationCount);
 	CG_CheckIndividualFontUpdate(&cgs.media.fpsFont, cg_drawFPSPointSize.integer, &cg_drawFPSFont, &cgs.media.fpsFontModificationCount, &cg_drawFPSPointSize, &cgs.media.fpsFontPointSizeModificationCount);
 	CG_CheckIndividualFontUpdate(&cgs.media.clientItemTimerFont, cg_drawClientItemTimerPointSize.integer, &cg_drawClientItemTimerFont, &cgs.media.clientItemTimerFontModificationCount, &cg_drawClientItemTimerPointSize, &cgs.media.clientItemTimerFontPointSizeModificationCount);
-	if (CG_CheckIndividualFontUpdate(&cgs.media.playerNamesFont, cg_drawPlayerNamesPointSize.integer, &cg_drawPlayerNamesFont, &cgs.media.playerNamesFontModificationCount, &cg_drawPlayerNamesPointSize, &cgs.media.playerNamesPointSizeModificationCount)) {
-		CG_CreateNameSprites();
-	}
-
 	CG_CheckIndividualFontUpdate(&cgs.media.snapshotFont, cg_drawSnapshotPointSize.integer, &cg_drawSnapshotFont, &cgs.media.snapshotFontModificationCount, &cg_drawSnapshotPointSize, &cgs.media.snapshotFontPointSizeModificationCount);
 	CG_CheckIndividualFontUpdate(&cgs.media.ammoWarningFont, cg_drawAmmoWarningPointSize.integer, &cg_drawAmmoWarningFont, &cgs.media.ammoWarningFontModificationCount, &cg_drawAmmoWarningPointSize, &cgs.media.ammoWarningFontPointSizeModificationCount);
 	CG_CheckIndividualFontUpdate(&cgs.media.crosshairNamesFont, cg_drawCrosshairNamesPointSize.integer, &cg_drawCrosshairNamesFont, &cgs.media.crosshairNamesFontModificationCount, &cg_drawCrosshairNamesPointSize, &cgs.media.crosshairNamesFontPointSizeModificationCount);
@@ -3936,18 +3889,9 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.tracerShader = trap_R_RegisterShader( "gfx/misc/tracer" );
 	cgs.media.selectShader = trap_R_RegisterShader( "gfx/2d/select" );
 
-	for ( i = 1 ; i < NUM_CROSSHAIRS ; i++ ) {
-		int w, h;
-		//cgs.media.crosshairShader[i] = trap_R_RegisterShader( va("gfx/2d/crosshair%c", 'a'+i) );
-		cgs.media.crosshairShader[i] = trap_R_RegisterShader( va("gfx/2d/crosshair%d", i) );
-		trap_GetShaderImageDimensions(cgs.media.crosshairShader[i], &w, &h);
-		if (w > 64  ||  h > 64) {
-			Com_Printf("^1skipping brightness for crosshair %d  (%d x %d)\n", i, w, h);
-		} else {
-			trap_GetShaderImageData(cgs.media.crosshairShader[i], cgs.media.crosshairOrigImage[i]);
-		}
-	}
-	CG_CreateNewCrosshairs();
+	for ( i = 0 ; i < NUM_CROSSHAIRS ; i++ ) {
+		cgs.media.crosshairShader[i] = trap_R_RegisterShader( va("gfx/2d/crosshair%c", 'a'+i) );
+	}	
 
 	cgs.media.backTileShader = trap_R_RegisterShader( "gfx/2d/backtile" );
 	cgs.media.noammoShader = trap_R_RegisterShader( "icons/noammo" );
@@ -8433,8 +8377,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 		//trap_GetCurrentSnapshotNumber( &cg.latestSnapshotNum, &cg.latestSnapshotTime );
 	}
 
-	CG_ReloadQ3mmeScripts(cg_fxfile.string);
-	CG_CreateNameSprites();
+	CG_ReloadQ3mmeScripts(cg_fxfile.string);	
 	if (cgs.protocolClass == PROTOCOL_QL  &&  cgs.customServerSettings & SERVER_SETTING_INFECTED  &&  cgs.gametype == GT_RED_ROVER) {
 		CG_LoadInfectedGameTypeModels();
 	}
