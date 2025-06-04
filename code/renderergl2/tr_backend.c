@@ -2568,12 +2568,7 @@ RB_SwapBuffers
 
 =============
 */
-/*
-=============
-RB_SwapBuffers
 
-=============
-*/
 const void	*RB_SwapBuffers( const void *data ) {
 	const swapBuffersCommand_t	*cmd;
 
