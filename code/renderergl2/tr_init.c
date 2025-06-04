@@ -1710,8 +1710,7 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 
 		memcount = RE_SaveJPGToBuffer(cmd->encodeBuffer, avilinelen * cmd->height,
 			r_aviMotionJpegQuality->integer,
-			cmd->width, cmd->height, cBuf, padlen);
-		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, memcount);
+			cmd->width, cmd->height, cBuf, padlen);		
 	}
 	else
 	{
@@ -1739,8 +1738,6 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 			
 			srcptr += padlen;
 		}
-		
-		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
 	}
 
 	return (const void *)(cmd + 1);	
@@ -2242,7 +2239,7 @@ void R_Register( void )
 
 	r_aviMotionJpegQuality = ri.Cvar_Get("r_aviMotionJpegQuality", "90", CVAR_ARCHIVE);
 	r_screenshotJpegQuality = ri.Cvar_Get("r_screenshotJpegQuality", "90", CVAR_ARCHIVE);
-	
+
 	r_maxpolys = ri.Cvar_Get( "r_maxpolys", va("%d", MAX_POLYS), 0);
 	r_maxpolyverts = ri.Cvar_Get( "r_maxpolyverts", va("%d", MAX_POLYVERTS), 0);
 	r_jpegCompressionQuality = ri.Cvar_Get("r_jpegCompressionQuality", "90", CVAR_ARCHIVE);
