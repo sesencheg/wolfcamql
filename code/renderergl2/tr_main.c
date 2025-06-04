@@ -795,8 +795,6 @@ void R_SetupProjection(viewParms_t *dest, float zProj, float zFar, qboolean comp
 {
 	float	xmin, xmax, ymin, ymax;
 	float	width, height, stereoSep = r_stereoSeparation->value;
-	float	dx, dy;
-	vec2_t	pixelJitter, eyeJitter;
 
 	/*
 	 * offset the view origin of the viewer for stereo rendering 
@@ -821,29 +819,7 @@ void R_SetupProjection(viewParms_t *dest, float zProj, float zFar, qboolean comp
 
 	width = xmax - xmin;
 	height = ymax - ymin;
-
-	if (tr.recordingVideo  ||  mme_dofVisualize->integer) {
-		pixelJitter[0] = pixelJitter[1] = 0;
-		eyeJitter[0] = eyeJitter[1] = 0;
-
-		/* Jitter the view */
-		if (mme_dofFrames->integer > 0) {
-			if (r_anaglyphMode->integer == 19  &&  *ri.SplitVideo  &&  !tr.leftRecorded) {
-				R_MME_JitterView( pixelJitter, eyeJitter, qfalse );
-			} else {
-				R_MME_JitterView( pixelJitter, eyeJitter, qtrue );
-			}
-		}
-
-		dx = ( pixelJitter[0]*width ) / backEnd.viewParms.viewportWidth;
-		dy = ( pixelJitter[1]*height ) / backEnd.viewParms.viewportHeight;
-		dx += eyeJitter[0];
-		dy += eyeJitter[1];
-
-		xmin += dx; xmax += dx;
-		ymin += dy; ymax += dy;
-	}
-
+	
 	dest->projectionMatrix[0] = 2 * zProj / width;
 	dest->projectionMatrix[4] = 0;
 	dest->projectionMatrix[8] = (xmax + xmin + 2 * stereoSep) / width;
