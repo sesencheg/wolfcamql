@@ -347,7 +347,7 @@ If running in stereo, RE_BeginFrame will be called twice
 for each RE_EndFrame
 ====================
 */
-void RE_BeginFrame( stereoFrame_t stereoFrame) {
+void RE_BeginFrame( stereoFrame_t stereoFrame, qboolean recordingVideo ) {
 	drawBufferCommand_t	*cmd = NULL;
 	colorMaskCommand_t *colcmd = NULL;
 
@@ -358,6 +358,7 @@ void RE_BeginFrame( stereoFrame_t stereoFrame) {
 
 	tr.frameCount++;
 	tr.frameSceneNum = 0;
+	tr.recordingVideo = recordingVideo;
 
 	//ri.Printf(PRINT_ALL, " ----  begin frame ---\n");
 

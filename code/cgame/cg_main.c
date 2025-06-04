@@ -86,9 +86,9 @@ Q_EXPORT intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, i
 	case CG_CONSOLE_COMMAND:
 		return CG_ConsoleCommand();
 	case CG_DRAW_ACTIVE_FRAME:
-		Com_Printf("^5active start\n");
+		//Com_Printf("^5active start\n");
 		CG_DrawActiveFrame(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-		Com_Printf("^5active end\n");
+		//Com_Printf("^5active end\n");
 		return 0;
 	case CG_CROSSHAIR_PLAYER:
 		return CG_CrosshairPlayer();
@@ -8206,15 +8206,14 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 	}
 
 	s = CG_ConfigString( CS_LEVEL_START_TIME );
-	cgs.levelStartTime = atoi( s );	
+	cgs.levelStartTime = atoi( s );
 
 	CG_ParseServerinfo(qtrue, qfalse);
 	if (cgs.protocolClass == PROTOCOL_QL) {
-		Com_Printf("^5ql%s ^5version %d.%d.%d.%d\n", cgs.isQuakeLiveBetaDemo ? " ^6beta" : "", cgs.qlversion[0], cgs.qlversion[1], cgs.qlversion[2], cgs.qlversion[3]);		
+		Com_Printf("^5ql%s ^5version %d.%d.%d.%d\n", cgs.isQuakeLiveBetaDemo ? " ^6beta" : "", cgs.qlversion[0], cgs.qlversion[1], cgs.qlversion[2], cgs.qlversion[3]);
 	}
 
 	CG_ParseWarmup();
-	
 	if (cg.warmup) {
 		if (cg.demoPlayback) {
 			cg.demoHasWarmup = qtrue;
@@ -8224,7 +8223,6 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 
 	// load the new map
 	CG_LoadingString( "collision map" );
-	Com_Printf ("CG_LoadingString");
 
 	Com_Printf("cgame: load map %s\n", cgs.mapname);
 	if (*SC_Cvar_Get_String("r_forceMap")) {
@@ -8232,7 +8230,7 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 		Com_Printf("^3forcing %s\n", cgs.mapname);
 	}
 	trap_GetRealMapName(cgs.mapname, cgs.realMapName, sizeof(cgs.realMapName));
-	Com_Printf("^3map: '%s' -> '%s'\n", cgs.mapname, cgs.realMapName);
+	//Com_Printf("^3map: '%s' -> '%s'\n", cgs.mapname, cgs.realMapName);
 	Q_strncpyz(buff, cgs.realMapName, sizeof(buff));
 	i = strlen(buff);
 	buff[i - 1] = 'g';
@@ -8240,7 +8238,6 @@ static void CG_Init (int serverMessageNum, int serverCommandSequence, int client
 	buff[i - 3] = 'c';
 	trap_SendConsoleCommand(va("exec %s\n", buff));
 	trap_CM_LoadMap( cgs.mapname );
-	Com_Printf ("trap_CM_LoadMap");
 
 	//COM_StripExtension(cgs.mapname, mname, sizeof(mname));
 	//trap_Cvar_Set("mapname", mname);

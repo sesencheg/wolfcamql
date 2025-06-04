@@ -495,12 +495,9 @@ This will be called twice if rendering in stereo mode
 */
 void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 	qboolean uiFullscreen;
-	
-	re.BeginFrame(stereoFrame);
 
-	
-	
-	
+	re.BeginFrame(stereoFrame, CL_VideoRecording(&afdMain));
+
 	uiFullscreen = (uivm && VM_Call( uivm, UI_IS_FULLSCREEN ));
 
 	// wide aspect ratio screens need to have the sides cleared
@@ -511,11 +508,11 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			re.DrawStretchPic( 0, 0, cls.glconfig.vidWidth, cls.glconfig.vidHeight, 0, 0, 0, 0, cls.whiteShader );
 			re.SetColor( NULL );
 		}
-	}	
+	}
 
 	// if the menu is going to cover the entire screen, we
 	// don't need to render anything under it
-	if ( uivm && !uiFullscreen ) {				
+	if ( uivm && !uiFullscreen ) {
 		switch( clc.state ) {
 		default:
 			Com_Error( ERR_FATAL, "SCR_DrawScreenField: bad clc.state" );
@@ -538,13 +535,14 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 			VM_Call( uivm, UI_DRAW_CONNECT_SCREEN, qfalse );
 			break;
 		case CA_LOADING:
-		case CA_PRIMED:			
-			// draw the game information screen and loading progress			
-			CL_CGameRendering(stereoFrame);			
+		case CA_PRIMED:
+			// draw the game information screen and loading progress
+			CL_CGameRendering(stereoFrame);
+
 			// also draw the connection information, so it doesn't
 			// flash away too briefly on local or lan games
-			// refresh to update the time			
-			VM_Call( uivm, UI_REFRESH, cls.realtime );			
+			// refresh to update the time
+			VM_Call( uivm, UI_REFRESH, cls.realtime );
 			VM_Call( uivm, UI_DRAW_CONNECT_SCREEN, qtrue );
 			break;
 		case CA_ACTIVE:
@@ -556,7 +554,6 @@ void SCR_DrawScreenField( stereoFrame_t stereoFrame ) {
 #endif
 			break;
 		}
-		
 	}
 
 	// the menu draws next
@@ -605,8 +602,8 @@ void SCR_UpdateScreen( void ) {
 			SCR_DrawScreenField( STEREO_RIGHT );
 		} else {
 			//Com_Printf("1:  %d\n", (int)time(NULL));
-			//Com_Printf("1:  %d\n", Sys_Milliseconds());			
-			SCR_DrawScreenField( STEREO_CENTER );			
+			//Com_Printf("1:  %d\n", Sys_Milliseconds());
+			SCR_DrawScreenField( STEREO_CENTER );
 		}
 
 		if ( com_speeds->integer ) {

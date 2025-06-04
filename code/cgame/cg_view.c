@@ -5192,7 +5192,7 @@ static void CG_CheckCvarInterp (void)
 	cvarInterp_t *c;
 
 	if (SC_Cvar_Get_Int("com_autoWriteConfig") == 2) {
-		//trap_autoWriteConfig(qfalse);
+		trap_autoWriteConfig(qfalse);
 	}
 
 	for (i = 0;  i < MAX_CVAR_INTERP;  i++) {
@@ -5234,7 +5234,7 @@ static void CG_CheckCvarInterp (void)
 		//Com_Printf("real:%d setting '%s' to %f\n", c->realTime, c->cvar,  c->startValue + (c->endValue - c->startValue) * f);
 	}
 
-	//trap_autoWriteConfig(qtrue);
+	trap_autoWriteConfig(qtrue);
 }
 
 static void CG_CheckAtCommands (void)
@@ -5710,7 +5710,7 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 	trap_GetGlconfig( &cgs.glconfig );
 	cgs.screenXScale = cgs.glconfig.vidWidth / 640.0;
 	cgs.screenYScale = cgs.glconfig.vidHeight / 480.0;
-	Com_Printf("w %d  h %d\n", cgs.glconfig.vidWidth, cgs.glconfig.vidHeight);
+	//Com_Printf("w %d  h %d\n", cgs.glconfig.vidWidth, cgs.glconfig.vidHeight);
 	memcpy(&cgDC.glconfig, &cgs.glconfig, sizeof(glconfig_t));
 	cgDC.widescreen = cg_wideScreen.integer;
 
@@ -5740,7 +5740,7 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	cg.videoRecording = videoRecording;
 	cg.ioverf = ioverf;
-	Com_Printf("ioverf %d\n", ioverf);
+	//Com_Printf("ioverf %d\n", ioverf);
 	cg.foverf = (double)ioverf / SUBTIME_RESOLUTION;
 	cg.draw = draw;
 	cg.realTime = trap_Milliseconds();
@@ -5756,7 +5756,7 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 	demo.play.fraction = (float)cg.foverf;
 	demo.serverTime = serverTime;
 
-	Com_Printf("%d  %f  %f\n", cg.time, cg.ftime, cg.foverf);
+	//Com_Printf("%d  %f  %f\n", cg.time, cg.ftime, cg.foverf);
 
 	if (cg.ftime != cg.cameraPointCommandTime) {
 		//cg.cameraPointCommandTime = -1;
@@ -5772,27 +5772,19 @@ void CG_DrawActiveFrame (int serverTime, stereoFrame_t stereoView, qboolean demo
 	cg.demoStreaming = demoStreaming;
 	cg.demoWaitingForStream = demoWaitingForStream;
 
-	
-	//trap_autoWriteConfig(qtrue);
-	
+	trap_autoWriteConfig(qtrue);
 
-	
 	CG_CheckCvarChange();
-	
 	CG_CheckRepeatKeys();
-	
 	CG_CheckCvarInterp();
-	
 	CG_CheckAtCommands();
-	
 
-	if (cg.looping  &&  serverTime >= cg.loopEndTime) {		
+	if (cg.looping  &&  serverTime >= cg.loopEndTime) {
+		//Com_Printf("looping\n");
 		trap_SendConsoleCommand(va("seekservertime %f\n", (double)cg.loopStartTime));
 		//cg.demoSeeking = qfalse;  //FIXME maybe?
 		return;
 	}
-
-	Com_Printf("cg.fragForwarding %f\n", cg.fragForwarding);
 
 	if (cg.fragForwarding) {
 		int cn, st;

@@ -1840,7 +1840,7 @@ void CG_ParseWarmup( void ) {
 		info = CG_ConfigStringNoConvert(CSCPMA_GAMESTATE);
 		warmup = atoi(Info_ValueForKey(info, "tw"));
 	} else if (cgs.protocolClass == PROTOCOL_QL) {
-		info = CG_ConfigString( CS_WARMUP );		
+		info = CG_ConfigString( CS_WARMUP );
 		warmup = atoi(Info_ValueForKey(info, "time"));
 	} else {
 		info = CG_ConfigString(CSQ3_WARMUP);

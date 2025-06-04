@@ -1014,9 +1014,8 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 			//Com_EventLoop(qtrue);
 			Cbuf_Execute();
 #endif
-			
+
 			SCR_UpdateScreen();
-			
 
 #if 0
 			S_Update();
@@ -1653,9 +1652,10 @@ CL_CGameRendering
 =====================
 */
 void CL_CGameRendering( stereoFrame_t stereo ) {
-	int startTime;	
+	int startTime;
+
 	startTime = Sys_Milliseconds();
-	VM_Call(cgvm, CG_DRAW_ACTIVE_FRAME, cl.serverTime, stereo, clc.demoplaying, di.streaming, di.waitingForStream, CL_VideoRecording(&afdMain), (int)(Overf * SUBTIME_RESOLUTION), qtrue);	
+	VM_Call(cgvm, CG_DRAW_ACTIVE_FRAME, cl.serverTime, stereo, clc.demoplaying, di.streaming, di.waitingForStream, CL_VideoRecording(&afdMain), (int)(Overf * SUBTIME_RESOLUTION), qtrue);
 	clc.cgameTime += (Sys_Milliseconds() - startTime);
 	VM_Debug( 0 );
 	//cl.draw = qtrue;
