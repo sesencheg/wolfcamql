@@ -4299,7 +4299,7 @@ void RE_GetShaderImageData (qhandle_t h, ubyte *data)
 	//}
 
 	//FIXME glGetTexImage() not supported
-	if (qglesMajorVersion >= 1) {
+	//if (qglesMajorVersion >= 1) {
 		int width, height;
 		GLuint fbo;
 		//FBO_t *fbo;
@@ -4335,16 +4335,16 @@ void RE_GetShaderImageData (qhandle_t h, ubyte *data)
 		//qglDeleteFramebuffers(1, &fbo);
 
 		return;
-	}
+	//}
 
 
-	GL_BindMultiTexture(GL_TEXTURE0_ARB, GL_TEXTURE_2D, image->texnum);
+	/*GL_BindMultiTexture(GL_TEXTURE0_ARB, GL_TEXTURE_2D, image->texnum);
 	qglGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
 	//FIXME
 	GL_BindMultiTexture(GL_TEXTURE0_ARB, GL_TEXTURE_2D, 0);
 
-	GL_CheckErrors();
+	GL_CheckErrors();*/
 }
 
 qhandle_t RE_GetSingleShader (void)
