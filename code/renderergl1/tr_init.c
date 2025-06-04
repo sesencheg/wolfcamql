@@ -189,6 +189,9 @@ cvar_t *r_defaultUnifontFallbacks;
 
 cvar_t	*r_marksOnTriangleMeshes;
 
+cvar_t	*r_aviMotionJpegQuality;
+cvar_t	*r_screenshotJpegQuality;
+
 cvar_t	*r_maxpolys;
 int		max_polys;
 cvar_t	*r_maxpolyverts;
@@ -1568,8 +1571,7 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 	{
 		memcount = RE_SaveJPGToBuffer(cmd->encodeBuffer, linelen * cmd->height,
 			r_aviMotionJpegQuality->integer,
-			cmd->width, cmd->height, cBuf, padlen);
-		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, memcount);
+			cmd->width, cmd->height, cBuf, padlen);		
 	}
 	else
 	{
@@ -1596,9 +1598,8 @@ const void *RB_TakeVideoFrameCmd( const void *data )
 			destptr += avipadlen;
 			
 			srcptr += padlen;
-		}
+		}		
 		
-		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
 	}
 
 	return (const void *)(cmd + 1);	
@@ -2019,6 +2020,9 @@ void R_Register( void )
 
 	r_marksOnTriangleMeshes = ri.Cvar_Get("r_marksOnTriangleMeshes", "0", CVAR_ARCHIVE);
 
+	r_aviMotionJpegQuality = ri.Cvar_Get("r_aviMotionJpegQuality", "90", CVAR_ARCHIVE);
+	r_screenshotJpegQuality = ri.Cvar_Get("r_screenshotJpegQuality", "90", CVAR_ARCHIVE);
+
 	r_maxpolys = ri.Cvar_Get( "r_maxpolys", va("%d", MAX_POLYS), 0);
 	r_maxpolyverts = ri.Cvar_Get( "r_maxpolyverts", va("%d", MAX_POLYVERTS), 0);
 	r_jpegCompressionQuality = ri.Cvar_Get("r_jpegCompressionQuality", "90", CVAR_ARCHIVE);
@@ -2207,8 +2211,7 @@ void RE_Shutdown( qboolean destroyWindow ) {
 		R_DeleteFramebufferObject();
 		R_DeleteTextures();
 	}
-
-	R_MME_Shutdown();
+	
 	R_DoneFreeType();
 
 	// shut down platform specific OpenGL stuff

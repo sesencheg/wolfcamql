@@ -1243,7 +1243,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 				backEnd.currentEntity = &backEnd.refdef.entities[entityNum];
 
 				// FIXME: e.shaderTime must be passed as int to avoid fp-precision loss issues
-				backEnd.refdef.floatTime = originalTime - (double)backEnd.currentEntity->e.shaderTime;
+				backEnd.refdef.floatTime = originalTime - (double)backEnd.currentEntity->ent.shaderTime;
 
 				// we have to reset the shaderTime as well otherwise image animations start
 				// from the wrong frame
@@ -1257,12 +1257,12 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 					R_TransformDlights( backEnd.refdef.num_dlights, backEnd.refdef.dlights, &backEnd.or );
 				}
 
-				if(backEnd.currentEntity->e.renderfx & RF_DEPTHHACK)
+				if(backEnd.currentEntity->ent.renderfx & RF_DEPTHHACK)
 				{
 					// hack the depth range to prevent view model from poking into walls
 					depthRange = qtrue;
 					
-					if(backEnd.currentEntity->e.renderfx & RF_CROSSHAIR)
+					if(backEnd.currentEntity->ent.renderfx & RF_CROSSHAIR)
 						isCrosshair = qtrue;
 				}
 			} else {
@@ -1700,47 +1700,6 @@ const void	*RB_DrawSurfs( const void *data ) {
 	backEnd.refdef = cmd->refdef;
 	backEnd.viewParms = cmd->viewParms;
 
-	// from q3mme
-
-	//Jitter the camera origin
-	if ( !backEnd.viewParms.isPortal && !(backEnd.refdef.rdflags & RDF_NOWORLDMODEL) ) {
-		int i;
-		float x, y;
-		qboolean adjustOrigin = qfalse;
-
-		if ((tr.recordingVideo  ||  mme_dofVisualize->integer)  &&  mme_dofFrames->integer > 0) {
-			if (r_anaglyphMode->integer == 19  &&  *ri.SplitVideo  &&  !tr.leftRecorded) {
-				adjustOrigin = R_MME_JitterOrigin(&x, &y, qfalse);
-			} else {
-				adjustOrigin = R_MME_JitterOrigin(&x, &y, qtrue);
-			}
-		}
-
-		if (adjustOrigin) {
-			orientationr_t* or = &backEnd.viewParms.or;
-			orientationr_t* world = &backEnd.viewParms.world;
-
-//			VectorScale( or->axis[0], 0.5, or->axis[0] );
-//			VectorScale( or->axis[1], 0.3, or->axis[1] );
-//			VectorScale( or->axis[2], 0.8, or->axis[2] );
-			VectorMA( or->origin, x, or->axis[1], or->origin );
-			VectorMA( or->origin, y, or->axis[2], or->origin );
-//			or->origin[2] += 4000;
-//			or->origin[2] += 0.1 * x;
-			R_RotateForWorld( or, world );
-			for ( i = 0; i < 16; i++ ) {
-				////int r = (rand() & 0xffff ) - 0x4000;
-				//world->modelMatrix[i] *= (0.9 + r * 0.0001);
-				//or->modelMatrix[i] *= (0.9 + r * 0.0001);
-			}
-		} else {
-			for ( i = 0; i < 16; i++ ) {
-//				int r = (rand() & 0xffff ) - 0x4000;
-//				backEnd.viewParms.world.modelMatrix[i] *= (0.9 + r * 0.0001);
-			}
-		}
-	}
-
 	RB_RenderDrawSurfList( cmd->drawSurfs, cmd->numDrawSurfs );
 
 	return (const void *)(cmd + 1);
@@ -1899,19 +1858,13 @@ RB_SwapBuffers
 
 =============
 */
-
-byte BufferTest[256 * 356 * 3];
-const void	*RB_SwapBuffers (const void *data, qboolean endFrame)
-{
+const void	*RB_SwapBuffers( const void *data ) {
 	const swapBuffersCommand_t	*cmd;
-	//GLenum target;
 
 	// finish any 2D drawing if needed
 	if ( tess.numIndexes ) {
 		RB_EndSurface();
 	}
-
-	qglColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
 	// texture swapping test
 	if ( r_showImages->integer ) {
@@ -1922,7 +1875,7 @@ const void	*RB_SwapBuffers (const void *data, qboolean endFrame)
 
 	// we measure overdraw by reading back the stencil buffer and
 	// counting up the number of increments that have happened
-	if (r_measureOverdraw->integer  &&  (!glConfig.fbo  ||  (glConfig.fbo  &&  tr.usingFinalFrameBufferObject  &&  tr.usingFboStencil))) {
+	if ( r_measureOverdraw->integer ) {
 		int i;
 		long sum = 0;
 		unsigned char *stencilReadback;
@@ -1938,144 +1891,6 @@ const void	*RB_SwapBuffers (const void *data, qboolean endFrame)
 		ri.Hunk_FreeTempMemory( stencilReadback );
 	}
 
-	if (tr.usingMultiSample) {
-		qglBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, tr.frameBufferMultiSample);
-		qglBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, tr.frameBuffer);
-		if (tr.usingFboStencil) {
-			// packed depth stencil, but apparently some cards have a problem
-			// if GL_STENCIL_BUFFER_BIT used
-			qglBlitFramebufferEXT(0, 0, glConfig.vidWidth, glConfig.vidHeight, 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		} else {
-			qglBlitFramebufferEXT(0, 0, glConfig.vidWidth, glConfig.vidHeight, 0, 0, glConfig.vidWidth, glConfig.vidHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-		}
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, tr.frameBuffer);
-	}
-
-	if (tr.usingFinalFrameBufferObject) {
-		qglReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-	}
-
-	// 2017-03-23 qglScissor() not working with bloom and 3d icons which set
-	//  a new scissor value  --  GL_RENDERER: AMD Radeon R9 M370X
-	//FIXME not enough to set scissor to size of viewport like in RB_SetGL2D()?
-	qglDisable(GL_SCISSOR_TEST);
-
-	RB_ColorCorrect();
-	//RB_ColorCorrect();
-	
-	qglEnable(GL_SCISSOR_TEST);
-
-	if (tr.usingFinalFrameBufferObject) {
-		int height, width;
-
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-
-		GL_SelectTextureUnit(1);
-		qglDisable(GL_TEXTURE_2D);
-
-		GL_SelectTextureUnit(0);
-
-		width = glConfig.visibleWindowWidth;
-		height = glConfig.visibleWindowHeight;
-
-		qglViewport(0, 0, width, height);
-		qglScissor(0, 0, width, height);
-		qglMatrixMode(GL_PROJECTION);
-		qglLoadIdentity();
-		qglOrtho(0, glConfig.vidWidth, glConfig.vidHeight, 0, 0, 1);
-		qglMatrixMode(GL_MODELVIEW);
-		qglLoadIdentity();
-
-		qglDisable(GL_CULL_FACE);
-		qglDisable(GL_CLIP_PLANE0);
-		qglDepthMask(GL_FALSE);
-
-		// set time for 2D shaders
-		backEnd.refdef.time = ri.ScaledMilliseconds();
-		backEnd.refdef.floatTime = backEnd.refdef.time * 0.001f;
-
-		backEnd.refdef.realTime = ri.RealMilliseconds();
-		backEnd.refdef.realFloatTime = backEnd.refdef.realTime * 0.001f;
-
-		GL_State(GLS_DEPTHTEST_DISABLE);
-		qglClear(GL_COLOR_BUFFER_BIT);
-		qglColor4f(1, 1, 1, 1);
-
-		qglDisable(GL_TEXTURE_2D);
-		qglEnable(GL_TEXTURE_RECTANGLE_ARB);
-
-		qglBindTexture(GL_TEXTURE_RECTANGLE_ARB, tr.sceneTexture);
-
-		width = glConfig.vidWidth;
-		height = glConfig.vidHeight;
-
-		qglBegin(GL_QUADS);
-
-		qglTexCoord2i(0, 0);
-		qglVertex2i(0, height);
-
-		qglTexCoord2i(width, 0);
-		qglVertex2i(width, height);
-
-		qglTexCoord2i(width, height);
-		qglVertex2i(width, 0);
-
-		qglTexCoord2i(0, height);
-		qglVertex2i(0, 0);
-
-		qglEnd();
-
-		qglBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
-		qglDisable(GL_TEXTURE_RECTANGLE_ARB);
-		qglEnable(GL_TEXTURE_2D);
-
-		qglBindTexture(GL_TEXTURE_2D, 0);
-
-		//qglDepthMask(GL_TRUE);
-
-		//qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, tr.frameBuffer);
-
-		//qglDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-		//qglReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-
-#if 0
-		{
-			GLenum status;
-
-		status = qglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-		if (status == GL_FRAMEBUFFER_COMPLETE_EXT) {
-			//tr.usingFinalFrameBufferObject = qtrue;
-		} else {
-			ri.Printf(PRINT_ALL, "^1%s framebuffer error: 0x%x\n", __FUNCTION__, status);
-			switch(status) {
-			case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_EXT:
-				ri.Printf(PRINT_ALL, "^1attachment\n");
-				break;
-			case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_EXT:
-				ri.Printf(PRINT_ALL, "^1missing attachment\n");
-				break;
-			case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT:
-				ri.Printf(PRINT_ALL, "^1dimensions\n");
-				break;
-			case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT:
-				ri.Printf(PRINT_ALL, "^1formats\n");
-				break;
-			case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT:
-				ri.Printf(PRINT_ALL, "^1draw buffer\n");
-				break;
-			case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT:
-				ri.Printf(PRINT_ALL, "^1read buffer\n");
-				break;
-			case GL_FRAMEBUFFER_UNSUPPORTED_EXT:
-				ri.Printf(PRINT_ALL, "^1unsupported\n");
-				break;
-			default:
-				ri.Printf(PRINT_ALL, "^1unknown error\n");
-			}
-		}
-		}
-#endif
-	}
 
 	if ( !glState.finishCalled ) {
 		qglFinish();
@@ -2083,83 +1898,11 @@ const void	*RB_SwapBuffers (const void *data, qboolean endFrame)
 
 	GLimp_LogComment( "***************** RB_SwapBuffers *****************\n\n\n" );
 
-	if (tr.usingFinalFrameBufferObject) {
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	}
-
-	if (endFrame) {
-		GLimp_EndFrame();
-	}
-
-	// leave at non-multisampled framebuffer for video and screenshots
-	if (tr.usingFinalFrameBufferObject) {
-		qglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, tr.frameBuffer);
-	}
+	GLimp_EndFrame();
 
 	backEnd.projection2D = qfalse;
 
 	return (const void *)(cmd + 1);
-}
-
-static const void *RB_DebugGraphics (const void *data)
-{
-	const debugGraphicsCommand_t *cmd;
-
-	cmd = (const debugGraphicsCommand_t *)data;
-
-	GL_Bind( tr.whiteImage);
-	GL_Cull( CT_FRONT_SIDED );
-	ri.CM_DrawDebugSurface( R_DebugPolygon );
-
-	return (const void *)(cmd + 1);
-}
-
-static const void *RB_SkipRenderCommand (const void *data)
-{
-	data = PADP(data, sizeof(void *));
-	switch (*(const int *)data) {
-		case RC_SET_COLOR:
-			data += sizeof(setColorCommand_t);
-			break;
-		case RC_STRETCH_PIC:
-			data += sizeof(stretchPicCommand_t);
-			break;
-		case RC_DRAW_SURFS:
-			data += sizeof(drawSurfsCommand_t);
-			break;
-		case RC_DRAW_BUFFER:
-			data += sizeof(drawBufferCommand_t);
-			break;
-		case RC_SWAP_BUFFERS:
-			data += sizeof(swapBuffersCommand_t);
-			break;
-		case RC_SCREENSHOT:
-			data += sizeof(screenshotCommand_t);
-			break;
-		case RC_VIDEOFRAME:
-			data += sizeof(videoFrameCommand_t);
-			break;
-		case RC_COLORMASK:
-			data += sizeof(colorMaskCommand_t);
-			break;
-		case RC_CLEARDEPTH:
-			data += sizeof(clearDepthCommand_t);
-			break;
-		case RC_BEGIN_HUD:
-			data += sizeof(beginHudCommand_t);
-			break;
-		case RC_DEBUG_GRAPHICS:
-			data += sizeof(debugGraphicsCommand_t);
-			break;
-		case RC_END_OF_LIST:
-			ri.Printf(PRINT_ALL, "^1RB_SkipRenderCommand():  called with RC_END_OF_LIST\n");
-			break;
-		default:
-			ri.Printf(PRINT_ALL, "^1RB_SkipRenderCommand():  unknown render xcommand: %d\n", *(const int *)data);
-			break;
-	}
-
-	return data;
 }
 
 /*
@@ -2177,7 +1920,7 @@ RB_ExecuteRenderCommands
 void RB_ExecuteRenderCommands( const void *data ) {
 	int		t1, t2;
 
-	t1 = ri.Milliseconds ();
+	t1 = ri.RealMilliseconds ();
 
 	while ( 1 ) {
 		data = PADP(data, sizeof(void *));
@@ -2213,7 +1956,7 @@ void RB_ExecuteRenderCommands( const void *data ) {
 		case RC_END_OF_LIST:
 		default:
 			// stop rendering
-			t2 = ri.Milliseconds ();
+			t2 = ri.RealMilliseconds ();
 			backEnd.pc.msec = t2 - t1;
 			return;
 		}
