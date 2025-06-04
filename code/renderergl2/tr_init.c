@@ -1639,7 +1639,108 @@ RB_TakeVideoFrameCmd
 */
 
 // RB_TakeVideoFrameCmd
-#include "../renderercommon/inc_tr_init.c"
+const void *RB_TakeVideoFrameCmd( const void *data )
+{
+	const videoFrameCommand_t	*cmd;
+	byte				*cBuf;
+	size_t				memcount, bytesPerPixel, linelen, avilinelen;
+	int				padwidth, avipadwidth, padlen, avipadlen;
+	int				yin, xin, xout;
+	GLint packAlign, format;
+
+	// finish any 2D drawing if needed
+	if(tess.numIndexes)
+		RB_EndSurface();
+
+	cmd = (const videoFrameCommand_t *)data;
+	
+	// OpenGL ES is only required to support reading GL_RGBA
+	if (qglesMajorVersion >= 1) {
+		format = GL_RGBA;
+		bytesPerPixel = 4;
+	} else {
+		format = GL_RGB;
+		bytesPerPixel = 3;
+	}
+
+	qglGetIntegerv(GL_PACK_ALIGNMENT, &packAlign);
+
+	linelen = cmd->width * bytesPerPixel;
+
+	// Alignment stuff for glReadPixels
+	padwidth = PAD(linelen, packAlign);
+	padlen = padwidth - linelen;
+
+	avilinelen = cmd->width * 3;
+
+	// AVI line padding
+	avipadwidth = PAD(avilinelen, AVI_LINE_PADDING);
+	avipadlen = avipadwidth - avilinelen;
+
+	cBuf = PADP(cmd->captureBuffer, packAlign);
+		
+	qglReadPixels(0, 0, cmd->width, cmd->height, format,
+		GL_UNSIGNED_BYTE, cBuf);
+
+	memcount = padwidth * cmd->height;
+
+	// gamma correct
+	if(glConfig.deviceSupportsGamma)
+		R_GammaCorrect(cBuf, memcount);
+
+	if(cmd->motionJpeg)
+	{
+		// Convert RGBA to RGB, in place, line by line
+		if (format == GL_RGBA) {
+			linelen = cmd->width * 3;
+			padlen = padwidth - linelen;
+
+			for (yin = 0; yin < cmd->height; yin++) {
+				for (xin = 0, xout = 0; xout < linelen; xin += 4, xout += 3) {
+					cBuf[yin*padwidth + xout + 0] = cBuf[yin*padwidth + xin + 0];
+					cBuf[yin*padwidth + xout + 1] = cBuf[yin*padwidth + xin + 1];
+					cBuf[yin*padwidth + xout + 2] = cBuf[yin*padwidth + xin + 2];
+				}
+			}
+		}
+
+		memcount = RE_SaveJPGToBuffer(cmd->encodeBuffer, avilinelen * cmd->height,
+			r_aviMotionJpegQuality->integer,
+			cmd->width, cmd->height, cBuf, padlen);
+		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, memcount);
+	}
+	else
+	{
+		byte *lineend, *memend;
+		byte *srcptr, *destptr;
+	
+		srcptr = cBuf;
+		destptr = cmd->encodeBuffer;
+		memend = srcptr + memcount;
+		
+		// swap R and B and remove line paddings
+		while(srcptr < memend)
+		{
+			lineend = srcptr + linelen;
+			while(srcptr < lineend)
+			{
+				*destptr++ = srcptr[2];
+				*destptr++ = srcptr[1];
+				*destptr++ = srcptr[0];
+				srcptr += bytesPerPixel;
+			}
+			
+			Com_Memset(destptr, '\0', avipadlen);
+			destptr += avipadlen;
+			
+			srcptr += padlen;
+		}
+		
+		ri.CL_WriteAVIVideoFrame(cmd->encodeBuffer, avipadwidth * cmd->height);
+	}
+
+	return (const void *)(cmd + 1);	
+}
 
 
 //============================================================================
