@@ -2178,9 +2178,6 @@ Q3R2OBJ = \
   $(B)/renderergl2/tr_main.o \
   $(B)/renderergl2/tr_marks.o \
   $(B)/renderergl2/tr_mesh.o \
-  $(B)/renderergl2/tr_mme.o \
-  $(B)/renderergl2/tr_mme_common.o \
-  $(B)/renderergl2/tr_mme_sse2.o \
   $(B)/renderergl2/tr_model.o \
   $(B)/renderergl2/tr_model_iqm.o \
   $(B)/renderergl2/tr_noise.o \
@@ -2252,9 +2249,6 @@ Q3ROBJ = \
   $(B)/renderergl1/tr_main.o \
   $(B)/renderergl1/tr_marks.o \
   $(B)/renderergl1/tr_mesh.o \
-  $(B)/renderergl1/tr_mme.o \
-  $(B)/renderergl1/tr_mme_common.o \
-  $(B)/renderergl1/tr_mme_sse2.o \
   $(B)/renderergl1/tr_model.o \
   $(B)/renderergl1/tr_model_iqm.o \
   $(B)/renderergl1/tr_noise.o \
