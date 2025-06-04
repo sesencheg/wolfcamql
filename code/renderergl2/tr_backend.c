@@ -2568,15 +2568,19 @@ RB_SwapBuffers
 
 =============
 */
-const void	*RB_SwapBuffers( const void *data, qboolean endFrame ) {
+/*
+=============
+RB_SwapBuffers
+
+=============
+*/
+const void	*RB_SwapBuffers( const void *data ) {
 	const swapBuffersCommand_t	*cmd;
 
 	// finish any 2D drawing if needed
 	if ( tess.numIndexes ) {
 		RB_EndSurface();
 	}
-
-	//RB_ColorCorrect();
 
 	// texture swapping test
 	if ( r_showImages->integer ) {
@@ -2609,52 +2613,11 @@ const void	*RB_SwapBuffers( const void *data, qboolean endFrame ) {
 		{
 			// Resolving an RGB16F MSAA FBO to the screen messes with the brightness, so resolve to an RGB16F FBO first
 			FBO_FastBlit(tr.renderFbo, NULL, tr.msaaResolveFbo, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-			if (tr.usingFinalFrameBufferObject) {
-				FBO_FastBlit(tr.msaaResolveFbo, NULL, tr.finalFbo, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-			} else {
-				FBO_FastBlit(tr.msaaResolveFbo, NULL, NULL, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-			}
+			FBO_FastBlit(tr.msaaResolveFbo, NULL, NULL, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 		else if (tr.renderFbo)
 		{
-			if (tr.usingFinalFrameBufferObject) {
-				FBO_FastBlit(tr.renderFbo, NULL, tr.finalFbo, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-			} else {
-					FBO_FastBlit(tr.renderFbo, NULL, NULL, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-			}
-		}
-
-		//FBO_FastBlit(tr.renderFbo, NULL, (void *)-1, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
-		//ri.Printf(PRINT_ALL, "frame...\n");
-	}
-
-	qglDisable(GL_SCISSOR_TEST);
-	//RB_QLPostProcessing();
-	qglEnable(GL_SCISSOR_TEST);
-
-	
-	// 2017-03-23 qglScissor() not working with bloom and 3d icons which set
-	//  a new scissor value  --  GL_RENDERER: AMD Radeon R9 M370X
-	//FIXME not enough to set scissor to size of viewport like in RB_SetGL2D()?
-	qglDisable(GL_SCISSOR_TEST);
-
-	if (!qglesMajorVersion) {
-		RB_ColorCorrect();
-	}
-
-	qglEnable(GL_SCISSOR_TEST);
-
-	if (glRefConfig.framebufferObject) {
-		if (tr.usingFinalFrameBufferObject) {
-			//GL_BindNullFramebuffers();
-			FBO_Bind(NULL);
-
-			//ri.Printf(PRINT_ALL, "finalfbo %p\n", tr.finalFbo);
-			FBO_Blit(tr.finalFbo, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-
-			// this
-			//FBO_FastBlit(tr.finalFbo, NULL, NULL, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			FBO_FastBlit(tr.renderFbo, NULL, NULL, NULL, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 	}
 
@@ -2664,19 +2627,7 @@ const void	*RB_SwapBuffers( const void *data, qboolean endFrame ) {
 
 	GLimp_LogComment( "***************** RB_SwapBuffers *****************\n\n\n" );
 
-	if (endFrame) {
-		GLimp_EndFrame();
-	}
-
-	// videos and screenshots
-	if (glRefConfig.framebufferObject) {
-		if (tr.usingFinalFrameBufferObject) {
-			FBO_Bind(tr.finalFbo);
-		} else {
-			//GL_BindNullFramebuffers();
-			FBO_Bind(NULL);
-		}
-	}
+	GLimp_EndFrame();
 
 	backEnd.projection2D = qfalse;
 
