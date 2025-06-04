@@ -2430,8 +2430,7 @@ void R_Init( void ) {
 	R_InitFreeType();
 
 	R_InitQueries();
-
-	R_MME_Init();
+	
 
 	// to show update for color skins
 	if (glRefConfig.framebufferObject) {
@@ -2618,8 +2617,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.RegisterShaderFromData = RE_RegisterShaderFromData;
 	re.GetShaderImageDimensions = RE_GetShaderImageDimensions;	
 	re.AddRefEntityPtrToScene = RE_AddRefEntityPtrToScene;
-	re.BeginHud = RE_BeginHud;
-	re.UpdateDof = RE_UpdateDof;
+	re.BeginHud = RE_BeginHud;	
 
 	return &re;
 }

@@ -149,4 +149,3 @@ equ trap_R_GetFontInfo -152
 equ trap_GetRoundStartTimes -153
 equ trap_GetTeamSwitchTime -154
 equ trap_R_BeginHud -155
-equ trap_R_UpdateDof -156

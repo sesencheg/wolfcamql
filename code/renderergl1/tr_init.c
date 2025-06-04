@@ -2162,9 +2162,7 @@ void R_Init( void ) {
 
 	R_ModelInit();
 
-	R_InitFreeType();
-
-	R_MME_Init();
+	R_InitFreeType();	
 
 	err = qglGetError();
 	if ( err != GL_NO_ERROR )
@@ -2320,8 +2318,7 @@ refexport_t *GetRefAPI ( int apiVersion, refimport_t *rimp ) {
 	re.RegisterShaderFromData = RE_RegisterShaderFromData;
 	re.GetShaderImageDimensions = RE_GetShaderImageDimensions;
 	re.GetSingleShader = RE_GetSingleShader;
-	re.BeginHud = RE_BeginHud;
-	re.UpdateDof = RE_UpdateDof;
+	re.BeginHud = RE_BeginHud;	
 
 	return &re;
 }

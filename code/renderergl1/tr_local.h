@@ -1966,7 +1966,6 @@ void R_Upload32( unsigned *data,
 						  int *format,
 			   int *pUploadWidth, int *pUploadHeight );
 void R_CreatePlayerColorSkinImages (qboolean force);
-void R_MME_Init (void);
 void R_TakeScreenshot( int x, int y, int width, int height, char *name, int type );
 mnode_t *R_PointInLeaf (const vec3_t p);
 void R_CreateSingleShader (void);
