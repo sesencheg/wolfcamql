@@ -1444,7 +1444,7 @@ RB_RenderDrawSurfList
 ==================
 */
 void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
-	shader_t                *shader = NULL, *oldShader;
+	shader_t		*shader = NULL, *oldShader;
 	int				fogNum, oldFogNum;
 	int				entityNum, oldEntityNum;
 	int				dlighted, oldDlighted;
@@ -1453,15 +1453,12 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	qboolean		depthRange, oldDepthRange, isCrosshair, wasCrosshair;
 	int				i;
 	drawSurf_t		*drawSurf;
-	//int				oldSort;
-	uint64_t 		oldSort;
+	int				oldSort;
 	double			originalTime;
-	double			realOriginalTime;
 	FBO_t*			fbo = NULL;
 
 	// save original time for entity shader offsets
 	originalTime = backEnd.refdef.floatTime;
-	realOriginalTime = backEnd.refdef.realFloatTime;
 
 	fbo = glState.currentFBO;
 
@@ -1480,9 +1477,6 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	backEnd.pc.c_surfaces += numDrawSurfs;
 
 	for (i = 0, drawSurf = drawSurfs ; i < numDrawSurfs ; i++, drawSurf++) {
-		qboolean useMergable;
-		qboolean dontMerge;
-
 		if ( drawSurf->sort == oldSort && drawSurf->cubemapIndex == oldCubemapIndex) {
 			if (backEnd.depthFill && shader && (shader->sort != SS_OPAQUE && shader->sort != SS_PORTAL))
 				continue;
@@ -1495,30 +1489,12 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 		R_DecomposeSort( drawSurf->sort, &entityNum, &shader, &fogNum, &dlighted, &pshadowed );
 		cubemapIndex = drawSurf->cubemapIndex;
 
-		if (r_ignoreEntityMergable->integer == 0) {
-			useMergable = qtrue;
-		} else if (r_ignoreEntityMergable->integer == 2  &&  mme_saveDepth->integer == 0) {
-			useMergable = qtrue;
-		} else {
-			useMergable = qfalse;
-		}
-
-		if (useMergable) {
-			if (shader  &&  !shader->entityMergable) {
-				dontMerge = qtrue;
-			} else {
-				dontMerge = qfalse;
-			}
-		} else {
-			dontMerge = qtrue;
-		}
-
 		//
 		// change the tess parameters if needed
 		// a "entityMergable" shader is a shader that can have surfaces from separate
 		// entities merged into a single batch, like smoke and blood puff sprites
 		if ( shader != NULL && ( shader != oldShader || fogNum != oldFogNum || dlighted != oldDlighted || pshadowed != oldPshadowed || cubemapIndex != oldCubemapIndex
-			|| ( entityNum != oldEntityNum  &&  dontMerge ) ) ) {
+			|| ( entityNum != oldEntityNum && !shader->entityMergable ) ) ) {
 			if (oldShader != NULL) {
 				RB_EndSurface();
 			}
@@ -1545,15 +1521,10 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 				// FIXME: e.shaderTime must be passed as int to avoid fp-precision loss issues
 				backEnd.refdef.floatTime = originalTime - (double)backEnd.currentEntity->e.shaderTime;
-				backEnd.refdef.realFloatTime = realOriginalTime - (double)backEnd.currentEntity->e.shaderTime;
 
 				// we have to reset the shaderTime as well otherwise image animations start
 				// from the wrong frame
-				if (tess.shader->useRealTime) {
-					tess.shaderTime = backEnd.refdef.realFloatTime - tess.shader->timeOffset;
-				} else {
-					tess.shaderTime = backEnd.refdef.floatTime - tess.shader->timeOffset;
-				}
+				tess.shaderTime = backEnd.refdef.floatTime - tess.shader->timeOffset;
 
 				// set up the transformation matrix
 				R_RotateForEntity( backEnd.currentEntity, &backEnd.viewParms, &backEnd.or );
@@ -1574,15 +1545,10 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 			} else {
 				backEnd.currentEntity = &tr.worldEntity;
 				backEnd.refdef.floatTime = originalTime;
-				backEnd.refdef.realFloatTime = realOriginalTime;
 				backEnd.or = backEnd.viewParms.world;
 				// we have to reset the shaderTime as well otherwise image animations on
 				// the world (like water) continue with the wrong frame
-				if (tess.shader->useRealTime) {
-					tess.shaderTime = backEnd.refdef.realFloatTime - tess.shader->timeOffset;
-				} else {
-					tess.shaderTime = backEnd.refdef.floatTime - tess.shader->timeOffset;
-				}
+				tess.shaderTime = backEnd.refdef.floatTime - tess.shader->timeOffset;
 				R_TransformDlights( backEnd.refdef.num_dlights, backEnd.refdef.dlights, &backEnd.or );
 			}
 
@@ -1641,20 +1607,14 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	}
 
 	backEnd.refdef.floatTime = originalTime;
-	backEnd.refdef.realFloatTime = realOriginalTime;
 
 	// draw the contents of the last shader batch
 	if (oldShader != NULL) {
 		RB_EndSurface();
 	}
 
-	if (glRefConfig.framebufferObject) {
-		if (tr.usingFinalFrameBufferObject  &&  fbo == NULL) {
-			fbo = tr.finalFbo;
-		}
-
+	if (glRefConfig.framebufferObject)
 		FBO_Bind(fbo);
-	}
 
 	// go back to the world modelview matrix
 
