@@ -3173,7 +3173,7 @@ RB_ExecuteRenderCommands
 void RB_ExecuteRenderCommands( const void *data ) {
 	int		t1, t2;
 
-	t1 = ri.Milliseconds ();
+	t1 = ri.RealMilliseconds ();
 
 	while ( 1 ) {
 		data = PADP(data, sizeof(void *));
@@ -3222,7 +3222,7 @@ void RB_ExecuteRenderCommands( const void *data ) {
 				RB_EndSurface();
 
 			// stop rendering
-			t2 = ri.Milliseconds ();
+			t2 = ri.RealMilliseconds ();
 			backEnd.pc.msec = t2 - t1;
 			return;
 		}
