@@ -1187,17 +1187,11 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	qboolean		depthRange, oldDepthRange, isCrosshair, wasCrosshair;
 	int				i;
 	drawSurf_t		*drawSurf;
-	//int				oldSort;
-	uint64_t oldSort;
-	//int64_t oldSort;
+	int				oldSort;
 	double			originalTime;
-	double			realOriginalTime;
-	//GLint loc;
-	//trRefEntity_t *ent;
 
 	// save original time for entity shader offsets
 	originalTime = backEnd.refdef.floatTime;
-	realOriginalTime = backEnd.refdef.realFloatTime;
 
 	// clear the z buffer, set the modelview, etc
 	RB_BeginDrawingView ();
@@ -1205,7 +1199,6 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	// draw everything
 	oldEntityNum = -1;
 	backEnd.currentEntity = &tr.worldEntity;
-	shader = NULL;
 	oldShader = NULL;
 	oldFogNum = -1;
 	oldDepthRange = qfalse;
@@ -1217,9 +1210,6 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	backEnd.pc.c_surfaces += numDrawSurfs;
 
 	for (i = 0, drawSurf = drawSurfs ; i < numDrawSurfs ; i++, drawSurf++) {
-		qboolean useMergable;
-		qboolean dontMerge;
-
 		if ( drawSurf->sort == oldSort ) {
 			// fast path, same as previous sort
 			rb_surfaceTable[ *drawSurf->surface ]( drawSurf->surface );
@@ -1228,35 +1218,12 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 		oldSort = drawSurf->sort;
 		R_DecomposeSort( drawSurf->sort, &entityNum, &shader, &fogNum, &dlighted );
 
-		if (r_ignoreEntityMergable->integer == 0) {
-			useMergable = qtrue;
-		} else if (r_ignoreEntityMergable->integer == 2  &&  mme_saveDepth->integer == 0) {
-			useMergable = qtrue;
-		} else {
-			useMergable = qfalse;
-		}
-
-		if (useMergable) {
-			if (shader  &&  !shader->entityMergable) {
-				dontMerge = qtrue;
-			} else {
-				dontMerge = qfalse;
-			}
-		} else {
-			dontMerge = qtrue;
-		}
-
-
 		//
 		// change the tess parameters if needed
 		// a "entityMergable" shader is a shader that can have surfaces from separate
 		// entities merged into a single batch, like smoke and blood puff sprites
-		if (shader != NULL  &&  (shader != oldShader  ||
-			fogNum != oldFogNum  ||
-			dlighted != oldDlighted ||
-            (entityNum != oldEntityNum  &&  dontMerge) )
-			) {
-
+		if ( shader != NULL && ( shader != oldShader || fogNum != oldFogNum || dlighted != oldDlighted 
+			|| ( entityNum != oldEntityNum && !shader->entityMergable ) ) ) {
 			if (oldShader != NULL) {
 				RB_EndSurface();
 			}
@@ -1266,36 +1233,21 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 			oldDlighted = dlighted;
 		}
 
-#if 0
-		if (backEnd.refdef.entities[entityNum].ePtr == NULL) {
-			ri.Printf(PRINT_ALL, "^1backend ent %d ePtr is NULL\n", entityNum);
-		}
-#endif
-
 		//
 		// change the modelview matrix if needed
 		//
 		if ( entityNum != oldEntityNum ) {
 			depthRange = isCrosshair = qfalse;
 
-			if ( entityNum != REFENTITYNUM_WORLD  &&  backEnd.refdef.entities[entityNum].ePtr == NULL) {
-				ri.Printf(PRINT_ALL, "^1%s refent ptr == NULL for entity %d\n", __FUNCTION__, entityNum);
-			}
-
-
-			if ( entityNum != REFENTITYNUM_WORLD  &&  backEnd.refdef.entities[entityNum].ePtr != NULL) {
+			if ( entityNum != REFENTITYNUM_WORLD ) {
 				backEnd.currentEntity = &backEnd.refdef.entities[entityNum];
-				// FIXME: e.shaderTime must be passed as into to avoid fp-precision loss issues
-				backEnd.refdef.floatTime = originalTime - (double)backEnd.currentEntity->ePtr->shaderTime;
-				backEnd.refdef.realFloatTime = realOriginalTime - (double)backEnd.currentEntity->ePtr->shaderTime;
+
+				// FIXME: e.shaderTime must be passed as int to avoid fp-precision loss issues
+				backEnd.refdef.floatTime = originalTime - (double)backEnd.currentEntity->e.shaderTime;
 
 				// we have to reset the shaderTime as well otherwise image animations start
 				// from the wrong frame
-				if (tess.shader->useRealTime) {
-					tess.shaderTime = backEnd.refdef.realFloatTime - tess.shader->timeOffset;
-				} else {
-					tess.shaderTime = backEnd.refdef.floatTime - tess.shader->timeOffset;
-				}
+				tess.shaderTime = backEnd.refdef.floatTime - tess.shader->timeOffset;
 
 				// set up the transformation matrix
 				R_RotateForEntity( backEnd.currentEntity, &backEnd.viewParms, &backEnd.or );
@@ -1305,32 +1257,21 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 					R_TransformDlights( backEnd.refdef.num_dlights, backEnd.refdef.dlights, &backEnd.or );
 				}
 
-				if(backEnd.currentEntity->ePtr->renderfx & RF_DEPTHHACK)
+				if(backEnd.currentEntity->e.renderfx & RF_DEPTHHACK)
 				{
 					// hack the depth range to prevent view model from poking into walls
 					depthRange = qtrue;
-#if 0
-					{
-						shader_t *shader;
-						shader = R_GetShaderByHandle(backEnd.currentEntity->e.customShader);
-						//ri.Printf(PRINT_ALL, "%s has depthhack\n", shader->name);
-					}
-#endif
-					if(backEnd.currentEntity->ePtr->renderfx & RF_CROSSHAIR)
+					
+					if(backEnd.currentEntity->e.renderfx & RF_CROSSHAIR)
 						isCrosshair = qtrue;
 				}
 			} else {
 				backEnd.currentEntity = &tr.worldEntity;
 				backEnd.refdef.floatTime = originalTime;
-				backEnd.refdef.realFloatTime = realOriginalTime;
 				backEnd.or = backEnd.viewParms.world;
 				// we have to reset the shaderTime as well otherwise image animations on
 				// the world (like water) continue with the wrong frame
-				if (tess.shader->useRealTime) {
-					tess.shaderTime = backEnd.refdef.realFloatTime - tess.shader->timeOffset;
-				} else {
-					tess.shaderTime = backEnd.refdef.floatTime - tess.shader->timeOffset;
-				}
+				tess.shaderTime = backEnd.refdef.floatTime - tess.shader->timeOffset;
 				R_TransformDlights( backEnd.refdef.num_dlights, backEnd.refdef.dlights, &backEnd.or );
 			}
 
@@ -1368,20 +1309,12 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 						}
 					}
 
-					if(!oldDepthRange) {
-						qglMatrixMode(GL_PROJECTION);
-						qglLoadMatrixf(backEnd.viewParms.projectionMatrixDepthHack);
-						qglMatrixMode(GL_MODELVIEW);
+					if(!oldDepthRange)
 						qglDepthRange (0, 0.3);
-						//qglDepthRange (0, Cvar_VariableValue("depth"));
-						//ri.Printf(PRINT_ALL, "set depth %f\n", Cvar_VariableValue("depth"));
-						//qglDepthRange (0, 0.001);
-					}
-					//qglDisable(GL_DEPTH_TEST);
 				}
 				else
 				{
-					if (1)  //(!wasCrosshair && backEnd.viewParms.stereoFrame != STEREO_CENTER)
+					if(!wasCrosshair && backEnd.viewParms.stereoFrame != STEREO_CENTER)
 					{
 						qglMatrixMode(GL_PROJECTION);
 						qglLoadMatrixf(backEnd.viewParms.projectionMatrix);
@@ -1403,7 +1336,6 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	}
 
 	backEnd.refdef.floatTime = originalTime;
-	backEnd.refdef.realFloatTime = realOriginalTime;
 
 	// draw the contents of the last shader batch
 	if (oldShader != NULL) {
@@ -1414,33 +1346,18 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 	qglLoadMatrixf( backEnd.viewParms.world.modelMatrix );
 	if ( depthRange ) {
 		qglDepthRange (0, 1);
-		//qglEnable(GL_DEPTH_TEST);
 	}
-
-
-	//qglDepthRange (0, 1);  // testing
 
 	if (r_drawSun->integer) {
 		RB_DrawSun(0.1, tr.sunShader);
 	}
 
-	RE_DrawPathLines();
+	// darken down any stencil shadows
+	RB_ShadowFinish();		
 
 	// add light flares on lights that aren't obscured
 	RB_RenderFlares();
-
-	// darken down any stencil shadows
-	// do last since it messes with depth settings
-	RB_ShadowFinish();
-
-#if 0  // testing
-	{
-		GLfloat lightpos[] = { 0.5, 1.0, 1.0, 0 };
-		qglLightfv(GL_LIGHT0, GL_POSITION, lightpos);
-	}
-#endif
 }
-
 
 /*
 ============================================================================
